@@ -1,8 +1,8 @@
 {
-    "name": "advent-of-code-2020",
+    "name": "advent-of-code-2020-day01",
     "version": "0.0.1",
     "author": "fwcd",
-    "synopsis": "My Advent of Code 2020 solutions",
+    "synopsis": "Day 01 of Advent of Code 2020",
     "category": [ "Programming" ],
     "license": "BSD-3-Clause",
     "licenseFile": "LICENSE",
