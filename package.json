@@ -1,0 +1,10 @@
+{
+    "name": "advent-of-code-2020",
+    "version": "0.0.1",
+    "author": "fwcd",
+    "synopsis": "My Advent of Code 2020 solutions",
+    "category": [ "Programming" ],
+    "license": "BSD-3-Clause",
+    "licenseFile": "LICENSE",
+    "dependencies": {}
+}
