@@ -1,8 +1,10 @@
 module Day01 where
 
-multCorrect :: Int -> Int -> Int
-multCorrect x y | x + y == 2020 = x * y
+part1 :: [Int] -> Int
+part1 nums = head $ [x * y | x <- nums, y <- nums, x + y == 2020]
 
-solution :: Int
-solution = multCorrect (anyOf nums) (anyOf nums)
-    where nums = [1721, 979, 366, 299, 675, 1456]
+main :: IO ()
+main = do
+    raw <- readFile "inputs/Day01.txt"
+    let nums = read <$> lines raw
+    putStrLn $ "The solution for part 1 is " ++ show (part1 nums)
