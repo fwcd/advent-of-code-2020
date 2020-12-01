@@ -1,8 +1,8 @@
 part1 :: [Int] -> Int
-part1 nums = head $ [x * y | x <- nums, y <- nums, x + y == 2020]
+part1 nums = head [x * y | x <- nums, y <- nums, x + y == 2020]
 
 part2 :: [Int] -> Int
-part2 nums = head $ [x * y * z | x <- nums, y <- nums, z <- nums, x + y + z == 2020]
+part2 nums = head [x * y * z | x <- nums, y <- nums, z <- nums, x + y + z == 2020]
 
 main :: IO ()
 main = do
