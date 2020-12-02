@@ -1,6 +1,6 @@
 # Advent of Code 2020 Solutions
 
-My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), written in 24 programming languages.
+My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), written in 25 programming languages.
 
 - [x] Day 01: Curry
 - [x] Day 02: Objective-C
@@ -24,3 +24,4 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [ ] Day 22: ?
 - [ ] Day 23: ?
 - [ ] Day 24: ?
+- [ ] Day 25: ?
