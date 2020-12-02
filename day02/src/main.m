@@ -8,7 +8,7 @@ NSRange parse(NSString *s, NSCharacterSet *charSet, int *i) {
 }
 
 BOOL isValidLine(NSString *line) {
-    if ([line length] > 0) {
+    if ([[line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] > 0) {
         int parsePos = 0;
         int minOccurrences = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
         parse(line, [NSCharacterSet punctuationCharacterSet], &parsePos);
@@ -35,6 +35,20 @@ BOOL isValidLine(NSString *line) {
     }
 }
 
+int part1(NSArray *lines) {
+    int validLines = 0;
+    int lineCount = [lines count];
+    int i;
+
+    for (i = 0; i < lineCount; i++) {
+        if (isValidLine([lines objectAtIndex:i])) {
+            validLines++;
+        }
+    }
+
+    return validLines;
+}
+
 int main(void) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSError *error = nil;
@@ -46,17 +60,8 @@ int main(void) {
         return 1;
     }
 
-    int validLines = 0;
     NSArray *lines = [input componentsSeparatedByString:@"\n"];
-    int lineCount = [lines count];
-    int i;
-    for (i = 0; i < lineCount; i++) {
-        if (isValidLine([lines objectAtIndex:i])) {
-            validLines++;
-        }
-    }
-
-    NSLog(@"Valid lines: %@", validLines);
+    NSLog(@"Part 1: %d", part1(lines));
 
     [pool drain];
     return 0;
