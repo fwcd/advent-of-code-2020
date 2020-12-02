@@ -3,7 +3,7 @@
 My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), written in 24 programming languages.
 
 - [x] Day 01: Curry
-- [ ] Day 02: Objective-C
+- [x] Day 02: Objective-C
 - [ ] Day 03: ?
 - [ ] Day 04: ?
 - [ ] Day 05: ?
