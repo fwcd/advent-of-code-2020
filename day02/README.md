@@ -29,11 +29,11 @@ How many passwords are valid according to their policies?
 To build on Linux, first make sure to have an ObjC compiler installed (e.g. `gcc`) and a runtime (e.g. `GNUStep`):
 
 ```bash
-sudo apt install gnustep gnustep-devel
+sudo apt install build-essential gobjc gobjc++ gnustep gnustep-devel libgnustep-base-dev
 ```
 
 Then, build the executable using:
 
 ```bash
-make
+. /usr/share/GNUstep/Makefiles/GNUstep.sh && make
 ```
