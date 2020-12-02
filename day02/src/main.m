@@ -1,5 +1,6 @@
 #include <Foundation/Foundation.h>
 
+/// Parses as many characters from the given set as possible and returns the range.
 NSRange parse(NSString *s, NSCharacterSet *charSet, int *i) {
     int length = [s length];
     int start = *i;
@@ -7,41 +8,48 @@ NSRange parse(NSString *s, NSCharacterSet *charSet, int *i) {
     return NSMakeRange(start, *i - start);
 }
 
-BOOL isValidLine(NSString *line) {
+/// Parses the given password/rule line and applies the given predicate.
+BOOL isValidLine(NSString *line, BOOL (*predicate)(int, int, char, NSString *)) {
     if ([[line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] > 0) {
         int parsePos = 0;
-        int minOccurrences = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
+        int first = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
         parse(line, [NSCharacterSet punctuationCharacterSet], &parsePos);
-        int maxOccurrences = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
+        int second = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
         parse(line, [NSCharacterSet whitespaceCharacterSet], &parsePos);
         char character = [[line substringWithRange:parse(line, [NSCharacterSet letterCharacterSet], &parsePos)] characterAtIndex:0];
         parse(line, [[NSCharacterSet letterCharacterSet] invertedSet], &parsePos);
         NSString *password = [line substringWithRange:parse(line, [NSCharacterSet letterCharacterSet], &parsePos)];
-        NSLog(@"min: %d, max: %d, char: %c, pw: %@", minOccurrences, maxOccurrences, character, password);
-        int length = [password length];
 
-        int occurrences = 0;
-        int i;
-        for (i = 0; i < length; i++) {
-            if (character == [password characterAtIndex:i]) {
-                occurrences++;
-            }
-        }
-
-        BOOL valid = occurrences >= minOccurrences && occurrences <= maxOccurrences;
-        return valid;
+        return predicate(first, second, character, password);
     } else {
         return NO;
     }
 }
 
-int part1(NSArray *lines) {
+BOOL part1Predicate(int min, int max, char c, NSString *password) {
+    int length = [password length];
+    int occurrences = 0;
+    int i;
+    for (i = 0; i < length; i++) {
+        if (c == [password characterAtIndex:i]) {
+            occurrences++;
+        }
+    }
+
+    return occurrences >= min && occurrences <= max;
+}
+
+BOOL part2Predicate(int first, int second, char c, NSString *password) {
+    return ([password characterAtIndex:first - 1] == c) ^ ([password characterAtIndex:second - 1] == c);
+}
+
+int validLineCount(NSArray *lines, BOOL (*predicate)(int, int, char, NSString *)) {
     int validLines = 0;
     int lineCount = [lines count];
     int i;
 
     for (i = 0; i < lineCount; i++) {
-        if (isValidLine([lines objectAtIndex:i])) {
+        if (isValidLine([lines objectAtIndex:i], predicate)) {
             validLines++;
         }
     }
@@ -61,7 +69,8 @@ int main(void) {
     }
 
     NSArray *lines = [input componentsSeparatedByString:@"\n"];
-    NSLog(@"Part 1: %d", part1(lines));
+    NSLog(@"Part 1: %d", validLineCount(lines, part1Predicate));
+    NSLog(@"Part 2: %d", validLineCount(lines, part2Predicate));
 
     [pool drain];
     return 0;
