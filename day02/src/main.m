@@ -2,8 +2,7 @@
 
 int main(void) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSObject *test = [[NSObject alloc] init];
-    printf("Test\n");
+    Test *t = [[[Test alloc] init] autorelease];
     [pool drain];
     return 0;
 }
