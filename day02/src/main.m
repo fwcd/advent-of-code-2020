@@ -1,25 +1,23 @@
 #include <Foundation/Foundation.h>
-#include <Foundation/NSRegularExpression.h>
+
+NSRange parse(NSString *s, NSCharacterSet *charSet, int *i) {
+    int length = [s length];
+    int start = *i;
+    for (; *i < length && [charSet characterIsMember:[s characterAtIndex:*i]]; ++*i);
+    return NSMakeRange(start, *i - start);
+}
 
 BOOL isValidLine(NSString *line) {
-    NSError *error = nil;
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"z"
-                                                                           options:0
-                                                                             error:&error];
-    if (error) {
-        NSLog(@"Could not create regex!");
-        return NO;
-    }
-
-    NSTextCheckingResult *match = [regex firstMatchInString:line options:0 range:NSMakeRange(0, [line length])];
-
-    if (match) {
-        NSLog(@"Matched: %@", line);
-        NSLog(@"Range %@", [match range]);
-        int minOccurrences = [[line substringWithRange:[match rangeAtIndex:1]] intValue];
-        int maxOccurrences = [[line substringWithRange:[match rangeAtIndex:2]] intValue];
-        char character = [[line substringWithRange:[match rangeAtIndex:3]] characterAtIndex:0];
-        NSString *password = [line substringWithRange:[match rangeAtIndex:4]];
+    if ([line length] > 0) {
+        int parsePos = 0;
+        int minOccurrences = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
+        parse(line, [NSCharacterSet punctuationCharacterSet], &parsePos);
+        int maxOccurrences = [[line substringWithRange:parse(line, [NSCharacterSet decimalDigitCharacterSet], &parsePos)] intValue];
+        parse(line, [NSCharacterSet whitespaceCharacterSet], &parsePos);
+        char character = [[line substringWithRange:parse(line, [NSCharacterSet letterCharacterSet], &parsePos)] characterAtIndex:0];
+        parse(line, [[NSCharacterSet letterCharacterSet] invertedSet], &parsePos);
+        NSString *password = [line substringWithRange:parse(line, [NSCharacterSet letterCharacterSet], &parsePos)];
+        NSLog(@"min: %d, max: %d, char: %c, pw: %@", minOccurrences, maxOccurrences, character, password);
         int length = [password length];
 
         int occurrences = 0;
@@ -31,7 +29,6 @@ BOOL isValidLine(NSString *line) {
         }
 
         BOOL valid = occurrences >= minOccurrences && occurrences <= maxOccurrences;
-        NSLog(@"Line valid: %@", valid);
         return valid;
     } else {
         return NO;
