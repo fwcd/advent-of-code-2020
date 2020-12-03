@@ -8,7 +8,7 @@ def count_trees(forest, right, down):
     return count
 
 def main():
-    with open("resources/test.txt", "r") as f:
+    with open("resources/input.txt", "r") as f:
         forest = [l.strip() for l in f.readlines()]
         part1 = count_trees(forest, 3, 1)
         print(f"Part 1: {part1}")
