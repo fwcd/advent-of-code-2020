@@ -4,7 +4,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 
 - [x] Day 01: Curry
 - [x] Day 02: Objective-C
-- [ ] Day 03: ?
+- [x] Day 03: Python
 - [ ] Day 04: ?
 - [ ] Day 05: ?
 - [ ] Day 06: ?
