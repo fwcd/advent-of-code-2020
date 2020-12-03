@@ -1,5 +1,5 @@
 def count_trees(forest, right, down):
-    i = 0
+    i = 1
     count = 0
     while (i * down) < len(forest):
         if forest[i * down][(i * right) % len(forest[0])] == "#":
@@ -8,8 +8,8 @@ def count_trees(forest, right, down):
     return count
 
 def main():
-    with open("resources/input.txt", "r") as f:
-        forest = f.readlines()
+    with open("resources/test.txt", "r") as f:
+        forest = [l.strip() for l in f.readlines()]
         part1 = count_trees(forest, 3, 1)
         print(f"Part 1: {part1}")
 
