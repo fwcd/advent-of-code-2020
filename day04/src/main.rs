@@ -18,15 +18,15 @@ fn parse_height(raw: &str) -> Option<(i32, String)> {
 }
 
 fn is_hair_color(raw: &str) -> bool {
-    Regex::new("#[0-9a-f]{6}").unwrap().is_match(raw)
+    Regex::new("^#[0-9a-f]{6}$").unwrap().is_match(raw)
 }
 
 fn is_eye_color(raw: &str) -> bool {
-    Regex::new("(?:amb|blu|brn|gry|grn|hzl|oth)").unwrap().is_match(raw)
+    Regex::new("^(?:amb|blu|brn|gry|grn|hzl|oth)$").unwrap().is_match(raw)
 }
 
 fn is_passport_id(raw: &str) -> bool {
-    Regex::new("[0-9]{9}").unwrap().is_match(raw)
+    Regex::new("^[0-9]{9}$").unwrap().is_match(raw)
 }
 
 fn is_valid_part1(pp: &HashMap<String, String>) -> bool {
@@ -39,7 +39,7 @@ fn is_valid_part2(pp: &HashMap<String, String>) -> bool {
         && pp.get("byr").and_then(|raw| raw.parse::<i32>().ok()).filter(|&byr| byr >= 1920 && byr <= 2002).is_some()
         && pp.get("iyr").and_then(|raw| raw.parse::<i32>().ok()).filter(|&byr| byr >= 2010 && byr <= 2020).is_some()
         && pp.get("eyr").and_then(|raw| raw.parse::<i32>().ok()).filter(|&byr| byr >= 2020 && byr <= 2030).is_some()
-        && pp.get("hgt").and_then(|raw| parse_height(raw)).filter(|(h, u)| if u == "cm" { *h >= 150 && *h <= 193 } else { *h >= 59 && *h <= 76 }).is_some()
+        && pp.get("hgt").and_then(|raw| parse_height(raw)).filter(|(h, u)| if u == "cm" { *h >= 150 && *h <= 193 } else if u == "in" { *h >= 59 && *h <= 76 } else { false }).is_some()
         && pp.get("hcl").filter(|raw| is_hair_color(raw)).is_some()
         && pp.get("ecl").filter(|raw| is_eye_color(raw)).is_some()
         && pp.get("pid").filter(|raw| is_passport_id(raw)).is_some()
