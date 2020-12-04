@@ -12,8 +12,8 @@ fn parse_passport(line: &str) -> HashMap<String, String> {
 }
 
 fn is_valid_passport(pp: HashMap<String, String>) -> bool {
-    let mut keys = pp.keys();
-    keys.all(|k| ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"].contains(&k.as_str()))
+    let required = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
+    required.iter().all(|&r| pp.keys().any(|k| k.as_str() == r))
 }
 
 fn main() {
