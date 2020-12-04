@@ -6,7 +6,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 02: Objective-C
 - [x] Day 03: Python
 - [x] Day 04: Rust
-- [ ] Day 05: ?
+- [ ] Day 05: OCaml
 - [ ] Day 06: ?
 - [ ] Day 07: ?
 - [ ] Day 08: ?
