@@ -1,12 +1,18 @@
-let replace s x y = Seq.map (fun v -> if v == x then y else v) s;;
+let replace x y s = Seq.map (fun v -> if v == x then y else v) s;;
 
-let binary_section s l r =
-    let bin_literal = (String.of_seq (List.to_seq ('0' :: 'b' :: List.of_seq (replace (replace (String.to_seq s) l '0') r '1')))) in
+let binary_section l r s =
+    let bin_literal = s |> String.to_seq
+                        |> replace l '0'
+                        |> replace r '1'
+                        |> List.of_seq
+                        |> (fun s -> '0' :: 'b' :: s)
+                        |> List.to_seq
+                        |> String.of_seq in
     int_of_string bin_literal;;
 
 let seat_id raw =
-    let row = binary_section (String.sub raw 0 7) 'F' 'B' in
-    let col = binary_section (String.sub raw 7 3) 'L' 'R' in
+    let row = binary_section 'F' 'B' (String.sub raw 0 7) in
+    let col = binary_section 'L' 'R' (String.sub raw 7 3) in
     row * 8 + col;;
 
 let read_lines filename =
@@ -22,10 +28,12 @@ let read_lines filename =
     List.rev !lines;;
 
 let () =
-    let seat_ids = List.sort compare (List.map seat_id (read_lines "resources/input.txt")) in
+    let seat_ids = read_lines "resources/input.txt" |> List.map seat_id
+                                                    |> List.sort compare in
     let part1 = List.fold_left max 0 seat_ids in
-    Printf.printf "Part 1: %d\n" part1;
-    let my_seat_ids = List.concat (List.mapi (fun i x -> if i + 1 < List.length seat_ids && x + 2 == List.nth seat_ids (i + 1) then [x + 1] else []) seat_ids) in
+    let my_seat_ids = seat_ids |> List.mapi (fun i x -> if i + 1 < List.length seat_ids && x + 2 == List.nth seat_ids (i + 1) then [x + 1] else [])
+                               |> List.concat in
     let part2 = List.hd my_seat_ids in
+    Printf.printf "Part 1: %d\n" part1;
     Printf.printf "Part 2: %d\n" part2;
     
