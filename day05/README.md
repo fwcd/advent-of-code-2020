@@ -10,6 +10,8 @@ opam switch create .
 opam install dune
 ```
 
+Note that you may need to run `eval $(opam env)` inbetween or when you restart your shell.
+
 ## Building
 
 To build the project run:
