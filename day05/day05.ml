@@ -22,7 +22,10 @@ let read_lines filename =
     List.rev !lines;;
 
 let () =
-    let seat_ids = List.map seat_id (read_lines "resources/input.txt") in
+    let seat_ids = List.sort compare (List.map seat_id (read_lines "resources/input.txt")) in
     let part1 = List.fold_left max 0 seat_ids in
-    Printf.printf "Part 1: %d" part1;;
+    Printf.printf "Part 1: %d\n" part1;
+    let my_seat_ids = List.concat (List.mapi (fun i x -> if i + 1 < List.length seat_ids && x + 2 == List.nth seat_ids (i + 1) then [x + 1] else []) seat_ids) in
+    let part2 = List.hd my_seat_ids in
+    Printf.printf "Part 2: %d\n" part2;
     
