@@ -10,6 +10,8 @@ let fold1 f zs = match Seq.toList zs with
 let main argv =
     let lns = File.ReadAllText("resources/input.txt")
     let groups = lns.Split("\n\n") |> Seq.map ((fun g -> g.Split("\n") |> Seq.map Set.ofSeq |> Seq.filter (Seq.isEmpty >> not)))
+    let part1 = groups |> Seq.map (fold1 Set.union >> Seq.length)
     let part2 = groups |> Seq.map (fold1 Set.intersect >> Seq.length)
+    printfn "Part 1: %d" (Seq.sum part1)
     printfn "Part 2: %d" (Seq.sum part2)
     0 // return an integer exit code
