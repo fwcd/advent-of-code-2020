@@ -1,5 +1,13 @@
-.PHONY: all
-all: out/day07
+OUTDIR = $(CURDIR)/out
+EXE = $(OUTDIR)/gcc-debug/day07
+SRC = day07.kk
 
-out/day07: day07.kk
-	koka -c day07.kk -o out
+.PHONY: all
+all: $(EXE)
+
+.PHONY: run
+run: $(EXE)
+	$(EXE)
+
+$(EXE): $(SRC)
+	koka -c $(SRC) -o $(OUTDIR)

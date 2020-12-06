@@ -1,3 +1,7 @@
+import std/os/file
+import std/os/path
+
 fun main() {
-    println("Hello AoC!")
+    val input = read-text-file(path("resources/input.txt"))
+    println(join(lines(input), " "))
 }
