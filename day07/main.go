@@ -37,7 +37,7 @@ func sumFrom(node string, graph map[string][]edge) int {
 	return result
 }
 
-func addedge(from string, to string, weight int, graph *map[string][]edge) {
+func addEdge(from string, to string, weight int, graph *map[string][]edge) {
 	_, ok := (*graph)[from]
 	if !ok {
 		(*graph)[from] = make([]edge, 0)
@@ -69,8 +69,8 @@ func main() {
 			count, err := strconv.Atoi(contained[1])
 			check(err)
 			innerBag := contained[2]
-			addedge(innerBag, outerBag, count, &innerToOuter)
-			addedge(outerBag, innerBag, count, &outerToInner)
+			addEdge(innerBag, outerBag, count, &innerToOuter)
+			addEdge(outerBag, innerBag, count, &outerToInner)
 		}
 	}
 
