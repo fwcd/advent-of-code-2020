@@ -18,15 +18,23 @@ func check(e error) {
 	}
 }
 
-func dfs(node string, graph map[string][]Edge, visited *map[string]bool) {
+func dfsFrom(node string, graph map[string][]Edge, visited *map[string]bool) {
 	for _, edge := range graph[node] {
 		next := edge.next
 		_, ok := (*visited)[next]
 		if !ok {
 			(*visited)[next] = true
-			dfs(next, graph, visited)
+			dfsFrom(next, graph, visited)
 		}
 	}
+}
+
+func sumFrom(node string, graph map[string][]Edge) int {
+	result := 1
+	for _, edge := range graph[node] {
+		result += edge.weight * sumFrom(edge.next, graph)
+	}
+	return result
 }
 
 func addEdge(from string, to string, weight int, graph *map[string][]Edge) {
@@ -67,6 +75,9 @@ func main() {
 	}
 
 	reachable := make(map[string]bool)
-	dfs("shiny gold", innerToOuter, &reachable)
+	dfsFrom("shiny gold", innerToOuter, &reachable)
 	fmt.Println("Part 1:", len(reachable))
+
+	sum := sumFrom("shiny gold", outerToInner)
+	fmt.Println("Part 2:", sum-1)
 }
