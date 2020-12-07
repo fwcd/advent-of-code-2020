@@ -8,7 +8,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 04: Rust
 - [x] Day 05: OCaml
 - [x] Day 06: F#
-- [ ] Day 07: Go
+- [x] Day 07: Go
 - [ ] Day 08: ?
 - [ ] Day 09: ?
 - [ ] Day 11: ?
