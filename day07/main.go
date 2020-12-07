@@ -4,7 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"regexp"
+	"strconv"
 )
+
+type Edge struct {
+	next   string
+	weight int
+}
 
 func check(e error) {
 	if e != nil {
@@ -12,15 +18,23 @@ func check(e error) {
 	}
 }
 
-func dfs(inner string, graph map[string][]string, visited *map[string]bool) {
-	for _, outer := range graph[inner] {
-		_, ok := (*visited)[outer]
-		fmt.Println("Outer", outer, ok)
+func dfs(node string, graph map[string][]Edge, visited *map[string]bool) {
+	for _, edge := range graph[node] {
+		next := edge.next
+		_, ok := (*visited)[next]
 		if !ok {
-			(*visited)[outer] = true
-			dfs(outer, graph, visited)
+			(*visited)[next] = true
+			dfs(next, graph, visited)
 		}
 	}
+}
+
+func addEdge(from string, to string, weight int, graph *map[string][]Edge) {
+	_, ok := (*graph)[from]
+	if !ok {
+		(*graph)[from] = make([]Edge, 0)
+	}
+	(*graph)[from] = append((*graph)[from], Edge{next: to, weight: weight})
 }
 
 func main() {
@@ -35,23 +49,24 @@ func main() {
 	containedPattern, err := regexp.Compile("(\\d+) ([a-z ]+) bag")
 	check(err)
 
-	graph := make(map[string][]string)
+	// Store graphs in both directions
+	innerToOuter := make(map[string][]Edge)
+	outerToInner := make(map[string][]Edge)
+
 	rules := rulePattern.FindAllStringSubmatch(input, -1)
 
 	for _, rule := range rules {
 		outerBag := rule[1]
 		for _, contained := range containedPattern.FindAllStringSubmatch(rule[2], -1) {
+			count, err := strconv.Atoi(contained[1])
+			check(err)
 			innerBag := contained[2]
-			_, ok := graph[innerBag]
-			if !ok {
-				graph[innerBag] = make([]string, 0)
-			}
-			graph[innerBag] = append(graph[innerBag], outerBag)
+			addEdge(innerBag, outerBag, count, &innerToOuter)
+			addEdge(outerBag, innerBag, count, &outerToInner)
 		}
 	}
 
-	fmt.Println(graph)
 	reachable := make(map[string]bool)
-	dfs("shiny gold", graph, &reachable)
+	dfs("shiny gold", innerToOuter, &reachable)
 	fmt.Println("Part 1:", len(reachable))
 }
