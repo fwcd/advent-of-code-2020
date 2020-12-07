@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type Edge struct {
+type edge struct {
 	next   string
 	weight int
 }
@@ -18,7 +18,7 @@ func check(e error) {
 	}
 }
 
-func dfsFrom(node string, graph map[string][]Edge, visited *map[string]bool) {
+func dfsFrom(node string, graph map[string][]edge, visited *map[string]bool) {
 	for _, edge := range graph[node] {
 		next := edge.next
 		_, ok := (*visited)[next]
@@ -29,7 +29,7 @@ func dfsFrom(node string, graph map[string][]Edge, visited *map[string]bool) {
 	}
 }
 
-func sumFrom(node string, graph map[string][]Edge) int {
+func sumFrom(node string, graph map[string][]edge) int {
 	result := 1
 	for _, edge := range graph[node] {
 		result += edge.weight * sumFrom(edge.next, graph)
@@ -37,12 +37,12 @@ func sumFrom(node string, graph map[string][]Edge) int {
 	return result
 }
 
-func addEdge(from string, to string, weight int, graph *map[string][]Edge) {
+func addedge(from string, to string, weight int, graph *map[string][]edge) {
 	_, ok := (*graph)[from]
 	if !ok {
-		(*graph)[from] = make([]Edge, 0)
+		(*graph)[from] = make([]edge, 0)
 	}
-	(*graph)[from] = append((*graph)[from], Edge{next: to, weight: weight})
+	(*graph)[from] = append((*graph)[from], edge{next: to, weight: weight})
 }
 
 func main() {
@@ -58,8 +58,8 @@ func main() {
 	check(err)
 
 	// Store graphs in both directions
-	innerToOuter := make(map[string][]Edge)
-	outerToInner := make(map[string][]Edge)
+	innerToOuter := make(map[string][]edge)
+	outerToInner := make(map[string][]edge)
 
 	rules := rulePattern.FindAllStringSubmatch(input, -1)
 
@@ -69,8 +69,8 @@ func main() {
 			count, err := strconv.Atoi(contained[1])
 			check(err)
 			innerBag := contained[2]
-			addEdge(innerBag, outerBag, count, &innerToOuter)
-			addEdge(outerBag, innerBag, count, &outerToInner)
+			addedge(innerBag, outerBag, count, &innerToOuter)
+			addedge(outerBag, innerBag, count, &outerToInner)
 		}
 	}
 
