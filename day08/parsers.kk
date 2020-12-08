@@ -54,6 +54,10 @@ public fun digit() : parse char {
     char(is-digit)
 }
 
+public fun space() : parse char {
+    char fn(c) { c == ' ' }
+}
+
 // Parses zero or more repetitions
 public fun many(p : () -> <div,parse> a) : <div,parse> list<a> {
     fun f(s) {
@@ -71,4 +75,8 @@ public fun many(p : () -> <div,parse> a) : <div,parse> list<a> {
 public fun number() : <div,parse> int {
     // default of -1 should never be needed
     parse-int-default(string(many(digit)), -1)
+}
+
+public fun spaces() : parse string {
+    string(many(space))
 }
