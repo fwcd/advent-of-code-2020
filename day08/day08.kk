@@ -47,7 +47,7 @@ fun char(p : char -> bool) : parse char {
     }
 }
 
-fun anyChar() : parse char {
+fun any-char() : parse char {
     char fn(_) { True }
 }
 
