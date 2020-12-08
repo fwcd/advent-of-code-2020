@@ -77,6 +77,6 @@ public fun number() : <div,parse> int {
     parse-int-default(string(many(digit)), -1)
 }
 
-public fun spaces() : parse string {
+public fun spaces() : <div,parse> string {
     string(many(space))
 }
