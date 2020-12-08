@@ -94,4 +94,8 @@ Fix the program so that it terminates normally by changing exactly one jmp (to n
 
 ## Setup
 
-First make sure to have [`koka`](https://github.com/koka-lang/koka) installed on your system.
+First make sure to have [`koka`](https://github.com/koka-lang/koka) installed on your system. Then run:
+
+```bash
+make run
+```
