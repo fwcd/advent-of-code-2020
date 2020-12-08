@@ -7,7 +7,7 @@ effect parse {
     fun satisfy(p : (string) -> div maybe<(a, string)>) : a
 }
 
-fun parse(input : string, parser : () -> parse a) : <div,exn> (a, string) {
+fun parse(input : string, parser : () -> <div,parse> a) : <div,exn> (a, string) {
     var rest := input
 
     with fun satisfy(p) {
@@ -25,7 +25,7 @@ fun parse(input : string, parser : () -> parse a) : <div,exn> (a, string) {
 }
 
 // Convenience function over parse that uses maybe instead
-fun parse-maybe(input : string, parser : () -> parse a) : div maybe<(a, string)> {
+fun parse-maybe(input : string, parser : () -> <div,parse> a) : div maybe<(a, string)> {
     try-default(Nothing) { Just(parse(input, parser)) }
 }
 
@@ -56,7 +56,7 @@ fun digit() : parse char {
 }
 
 // Parses zero or more repetitions
-fun many(p : () -> parse a) : <div,parse> list<a> {
+fun many(p : () -> <div,parse> a) : <div,parse> list<a> {
     fun f(s) {
         match (parse-maybe(s, p)) {
             Just((x, rest)) -> {
@@ -69,8 +69,13 @@ fun many(p : () -> parse a) : <div,parse> list<a> {
     satisfy fn(s) { Just(f(s)) }
 }
 
+fun number() : <div,parse> int {
+    // default of -1 should never be needed
+    parse-int-default(string(many(digit)), -1)
+}
+
 fun main() {
     val input = read-text-file(path("resources/input.txt"))
-    val (result, _) = parse(input, anyChar)
+    val (result, _) = parse(input, number)
     println(result)
 }
