@@ -22,8 +22,62 @@ fun instruction() : <div,parse> instruction {
     Instruction(op, value)
 }
 
+effect machine {
+    fun jmp(delta : int) : ()
+
+    fun acc(delta : int) : ()
+
+    fun nop() : ()
+}
+
+fun run(inst : instruction) : <exn,machine> () {
+    match (inst.op) {
+        "acc" -> acc(inst.value)
+        "jmp" -> jmp(inst.value)
+        "nop" -> nop()
+        _     -> throw("Unknown instruction: " + inst.op)
+    }
+}
+
+fun part1(prog : list<instruction>) : <console,div,exn> int {
+    var previous-ips := []
+    var ip := 0
+    var value := 0
+
+    fun move-ip(delta : int) {
+        previous-ips := Cons(ip, previous-ips)
+        ip := ip + delta
+    }
+
+    with {
+        fun jmp(delta) {
+            println("Jumping by " + show(delta))
+            move-ip(delta)
+        }
+        fun acc(delta) {
+            println("Accing by " + show(delta))
+            value := value + delta
+            move-ip(1)
+        }
+        fun nop() {
+            println("Nopping")
+            move-ip(1)
+        }
+    }
+
+    while { all(previous-ips) fn(p) { p != ip } } {
+        match (prog[ip]) {
+            Just(inst) -> run(inst)
+            Nothing    -> throw("No instruction left :(")
+        }
+    }
+
+    value
+}
+
 fun main() {
     val input = read-text-file(path("resources/input.txt"))
     val instructions = concat-maybe(map(lines(input)) fn(l) { parse-value-maybe(l, instruction) })
-    println(join(map(instructions, pretty), "\n"))
+
+    println("Part 1: " + show(part1(instructions)))
 }
