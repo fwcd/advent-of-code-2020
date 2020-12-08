@@ -10,7 +10,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 06: F#
 - [x] Day 07: Go
 - [x] Day 08: Koka
-- [ ] Day 09: ?
+- [ ] Day 09: Dart
 - [ ] Day 11: ?
 - [ ] Day 12: ?
 - [ ] Day 13: ?
