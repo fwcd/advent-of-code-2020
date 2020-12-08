@@ -39,7 +39,7 @@ fun run(inst : instruction) : <exn,machine> () {
     }
 }
 
-fun part1(prog : list<instruction>) : <console,div,exn> int {
+fun part1(prog : list<instruction>) : <div,exn> int {
     var previous-ips := []
     var ip := 0
     var value := 0
@@ -51,16 +51,13 @@ fun part1(prog : list<instruction>) : <console,div,exn> int {
 
     with {
         fun jmp(delta) {
-            println("Jumping by " + show(delta))
             move-ip(delta)
         }
         fun acc(delta) {
-            println("Accing by " + show(delta))
             value := value + delta
             move-ip(1)
         }
         fun nop() {
-            println("Nopping")
             move-ip(1)
         }
     }
