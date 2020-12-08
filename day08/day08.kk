@@ -39,10 +39,11 @@ fun run(inst : instruction) : <exn,machine> () {
     }
 }
 
-fun part1(prog : list<instruction>) : <div,exn> int {
+fun interpret(prog : list<instruction>) : <div,exn> (int, bool) {
     var previous-ips := []
     var ip := 0
     var value := 0
+    var terminated := False
 
     fun move-ip(delta : int) {
         previous-ips := Cons(ip, previous-ips)
@@ -62,19 +63,46 @@ fun part1(prog : list<instruction>) : <div,exn> int {
         }
     }
 
-    while { all(previous-ips) fn(p) { p != ip } } {
+    // Run until program either terminates or runs into endless loop
+    while { !terminated && all(previous-ips) fn(p) { p != ip } } {
         match (prog[ip]) {
             Just(inst) -> run(inst)
-            Nothing    -> throw("No instruction left :(")
+            Nothing    -> terminated := True
         }
     }
 
-    value
+    (value, terminated)
+}
+
+fun replace-nth(xs : list<a>, i : int, x : a) : list<a> {
+    map-indexed(xs) fn(j, y) {
+        if (i == j) x else y
+    }
+}
+
+fun potential-fixes(prog : list<instruction>) : console list<list<instruction>> {
+    concat-maybe(map-indexed(prog) fn(i, inst) {
+        match (inst.op) {
+            "nop" -> Just(replace-nth(prog, i, Instruction("jmp", inst.value)))
+            "jmp" -> Just(replace-nth(prog, i, Instruction("nop", inst.value)))
+            _     -> Nothing
+        }
+    })
 }
 
 fun main() {
     val input = read-text-file(path("resources/input.txt"))
-    val instructions = concat-maybe(map(lines(input)) fn(l) { parse-value-maybe(l, instruction) })
+    // Not declared as a variable due to a compiler bug that causes a segfault
+    // if interpret is called with the same list of instructions multiple times
+    fun instructions() { concat-maybe(map(lines(input)) fn(l) { parse-value-maybe(l, instruction) }) }
 
-    println("Part 1: " + show(part1(instructions)))
+    val (part1, _) = interpret(instructions())
+    println("Part 1: " + show(part1))
+
+    val fixes = potential-fixes(instructions())
+    val part2 = filter-map(fixes) fn(prog) {
+        val (result, terminated) = interpret(prog)
+        if (terminated) Just(result) else Nothing
+    }
+    println("Part 2: " + show(part2))
 }
