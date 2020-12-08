@@ -9,7 +9,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 05: OCaml
 - [x] Day 06: F#
 - [x] Day 07: Go
-- [ ] Day 08: Koka
+- [x] Day 08: Koka
 - [ ] Day 09: ?
 - [ ] Day 11: ?
 - [ ] Day 12: ?
