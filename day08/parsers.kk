@@ -10,7 +10,7 @@ public fun parse(input : string, parser : () -> <div,parse> a) : <div,exn> (a, s
     var rest := input
 
     with fun satisfy(p) {
-        match (p(input)) {
+        match (p(rest)) {
             Nothing      -> throw("Long word, no parse :( (failed while parsing '" + input + "')")
             Just((x, r)) -> {
                 rest := r
@@ -23,9 +23,23 @@ public fun parse(input : string, parser : () -> <div,parse> a) : <div,exn> (a, s
     return (result, rest)
 }
 
+// Convenience function over parse that only returns the value
+public fun parse-value(input : string, parser : () -> <div,parse> a) : <div,exn> a {
+    val (result, _) = parse(input, parser)
+    result
+}
+
 // Convenience function over parse that uses maybe instead
-fun parse-maybe(input : string, parser : () -> <div,parse> a) : div maybe<(a, string)> {
+public fun parse-maybe(input : string, parser : () -> <div,parse> a) : div maybe<(a, string)> {
     try-default(Nothing) { Just(parse(input, parser)) }
+}
+
+// Convenience function over parse that only returns the value and uses maybe
+public fun parse-value-maybe(input : string, parser : () -> <div,parse> a) : div maybe<a> {
+    match (parse-maybe(input, parser)) {
+        Just((result, _)) -> Just(result)
+        Nothing           -> Nothing
+    }
 }
 
 public fun word() : parse string {

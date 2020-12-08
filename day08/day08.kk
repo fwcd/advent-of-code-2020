@@ -10,6 +10,10 @@ struct instruction {
     value : int
 }
 
+fun pretty(inst : instruction) : string {
+    inst.op + " " + show(inst.value)
+}
+
 fun instruction() : <div,parse> instruction {
     val op = word()
     spaces()
@@ -20,6 +24,6 @@ fun instruction() : <div,parse> instruction {
 
 fun main() {
     val input = read-text-file(path("resources/input.txt"))
-    val (result, _) = parse(input, number)
-    println(result)
+    val instructions = concat-maybe(map(lines(input)) fn(l) { parse-value-maybe(l, instruction) })
+    println(join(map(instructions, pretty), "\n"))
 }
