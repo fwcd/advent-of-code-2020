@@ -1,4 +1,6 @@
-void main(List<String> arguments) {
-  var aoc = "AoC";
-  print('Hello ${aoc}!');
+import 'dart:io';
+
+Future<void> main(List<String> arguments) async {
+  final input = await File('resources/input.txt').readAsString();
+  print(input);
 }
