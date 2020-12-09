@@ -11,6 +11,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 07: Go
 - [x] Day 08: Koka
 - [x] Day 09: Dart
+- [ ] Day 10: ?
 - [ ] Day 11: ?
 - [ ] Day 12: ?
 - [ ] Day 13: ?
@@ -20,6 +21,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [ ] Day 17: ?
 - [ ] Day 18: ?
 - [ ] Day 19: ?
+- [ ] Day 20: ?
 - [ ] Day 21: ?
 - [ ] Day 22: ?
 - [ ] Day 23: ?
