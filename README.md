@@ -11,7 +11,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 07: Go
 - [x] Day 08: Koka
 - [x] Day 09: Dart
-- [ ] Day 10: ?
+- [ ] Day 10: PureScript
 - [ ] Day 11: ?
 - [ ] Day 12: ?
 - [ ] Day 13: ?
