@@ -2,9 +2,9 @@ module Main where
 
 import Prelude
 
-import Data.Array (catMaybes, deleteAt, drop, elem, filter, group, head, length, modifyAt, nub, sort, tail, take, (!!), (..), (:))
+import Data.Array (catMaybes, deleteAt, elem, filter, group, head, length, modifyAt, nub, sort, tail, take, (!!), (..), (:))
 import Data.Array.NonEmpty (toArray)
-import Data.Foldable (maximum, product, sum)
+import Data.Foldable (maximum, product)
 import Data.Int.Parse (parseInt, toRadix)
 import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..), split)
@@ -28,33 +28,34 @@ maybeToArray :: forall a. Maybe a -> Array a
 maybeToArray (Just x) = [x]
 maybeToArray Nothing  = []
 
-countArrangements :: Array Int -> Int
-countArrangements [x] | x <= 3 = 1
-countArrangements xs = sum $ do
-  i <- 0 .. (length xs - 1)
-  j <- (i + 1) .. (length xs - 1)
+arrangementsOfChunk :: Array Int -> Array (Array Int)
+arrangementsOfChunk [x] | x <= 3    = [[x]]
+                        | otherwise = []
+arrangementsOfChunk xs = do
+  i <- 0 .. (length xs - 2)
+  let j = i + 1
   x <- maybeToArray $ xs !! i
   y <- maybeToArray $ xs !! j
 
-  if x + y == 3 then 
-    [1]
-  else if x + y > 3 then
-    []
-  else do
+  xs : if x + y <= 3 then do
     xs'  <- maybeToArray $ deleteAt j xs
-    xs'' <- maybeToArray $ modifyAt i (add j) xs'
-    pure $ 1 + countArrangements xs''
+    xs'' <- maybeToArray $ modifyAt i (add y) xs'
+    arrangementsOfChunk xs''
+  else []
+
+countArrangements :: Array Int -> Int
+countArrangements xs = product $ map (length <<< nub <<< arrangementsOfChunk) chunksOf1s
+  where chunksOf1s = map toArray $ filter (elem 1) $ group xs
 
 main :: Effect Unit
 main = do
-  input <- readTextFile UTF8 "resources/input.txt"
+  input <- readTextFile UTF8 "resources/example2.txt"
   let joltages = sort $ catMaybes $ map (flip parseInt $ toRadix 10) $ split (Pattern "\n") input
       parts = do
         m <- maximum joltages
         path <- joltagePath 0 (m + 3) joltages
         let part1 = length (filter (eq 1) path) * length (filter (eq 3) path)
-            chunksOf1s = map toArray $ filter (elem 1) $ group path
-            part2 = product $ map countArrangements chunksOf1s
+            part2 = countArrangements path
         pure $ Tuple part1 part2
 
   case parts of
