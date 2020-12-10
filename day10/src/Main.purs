@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 
-import Data.Array (catMaybes, delete, filter, head, length, sort, take, (:))
+import Data.Array (catMaybes, filter, head, length, sort, tail, take, (:))
 import Data.Foldable (maximum)
 import Data.Int.Parse (parseInt, toRadix)
 import Data.Maybe (Maybe(..))
@@ -15,11 +15,12 @@ import Node.FS.Sync (readTextFile)
 joltagePath :: Int -> Int -> Array Int -> Maybe (Array Int)
 joltagePath j maxJ as | j == maxJ - 3 = Just [3]
                       | j >  maxJ - 3 = Nothing
-                      | otherwise     = head $ do
-                        a <- filter (\a -> a - j <= 3) $ take 3 as
-                        case joltagePath a maxJ (delete a as) of
-                          Just ds -> [(a - j) : ds]
-                          Nothing -> []
+                      | otherwise     = do
+                        a <- head $ filter (\a -> a - j <= 3) $ take 3 as
+                        as' <- tail as
+                        case joltagePath a maxJ as' of
+                          Just ds -> Just $ (a - j) : ds
+                          Nothing -> joltagePath j maxJ as'
 
 main :: Effect Unit
 main = do
