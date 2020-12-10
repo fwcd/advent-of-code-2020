@@ -1,6 +1,7 @@
-import std.stdio;
+import std.stdio, std.file;
 
 void main()
 {
-	writeln("Hello AoC!");
+	auto input = readText("resources/input.txt");
+	writefln("Input: %s", input);
 }
