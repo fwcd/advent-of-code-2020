@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Array (catMaybes, deleteAt, elem, filter, group, head, length, modifyAt, nub, sort, tail, take, (!!), (..), (:))
 import Data.Array.NonEmpty (toArray)
+import Data.BigInt (BigInt, fromInt)
 import Data.Foldable (maximum, product)
 import Data.Int.Parse (parseInt, toRadix)
 import Data.Maybe (Maybe(..))
@@ -43,13 +44,13 @@ arrangementsOfChunk xs = do
     arrangementsOfChunk xs''
   else []
 
-countArrangements :: Array Int -> Int
-countArrangements xs = product $ map (length <<< nub <<< arrangementsOfChunk) chunksOf1s
+countArrangements :: Array Int -> BigInt
+countArrangements xs = product $ map (fromInt <<< length <<< nub <<< arrangementsOfChunk) chunksOf1s
   where chunksOf1s = map toArray $ filter (elem 1) $ group xs
 
 main :: Effect Unit
 main = do
-  input <- readTextFile UTF8 "resources/example2.txt"
+  input <- readTextFile UTF8 "resources/input.txt"
   let joltages = sort $ catMaybes $ map (flip parseInt $ toRadix 10) $ split (Pattern "\n") input
       parts = do
         m <- maximum joltages

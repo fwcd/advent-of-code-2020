@@ -9,9 +9,7 @@ cases, so that you don't need to know Dhall to use it.
 Due to how `dhall format` currently works, this comment's
 instructions cannot appear near corresponding sections below
 because `dhall format` will delete the comment. However,
-it will not delete a top-level comment like this one.
-
-## Use Cases
+it will not delete a top-level comment like this one. ## Use Cases
 
 Most will want to do one or both of these options:
 1. Override/Patch a package's dependency

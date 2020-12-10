@@ -4,7 +4,8 @@ You can edit this file as you like.
 -}
 { name = "my-project"
 , dependencies =
-  [ "console"
+  [ "bigints"
+  , "console"
   , "debug"
   , "effect"
   , "node-buffer"

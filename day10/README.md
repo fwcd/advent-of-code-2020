@@ -8,6 +8,12 @@ First, make sure to have the PureScript compiler and the Spago build tool instal
 npm install -g purescript spago
 ```
 
+Additionally, we need `big-integer`:
+
+```bash
+npm install big-integer
+```
+
 ## Running
 
 ```bash
