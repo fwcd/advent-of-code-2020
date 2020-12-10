@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"fwcd"
+	],
+	"copyright": "Copyright © 2020, fwcd",
+	"description": "Advent of Code day 11",
+	"license": "BSD 3-clause",
+	"name": "day11"
+}
