@@ -2,6 +2,7 @@ import std.stdio, std.file, std.array, std.container, std.algorithm, std.conv, s
 
 private dchar OCCUPIED = '#';
 private dchar EMPTY = 'L';
+private dchar FLOOR = '.';
 
 private dchar[] neighbors(dchar[][] grid, int x, int y) {
 	auto nbs = Array!dchar();
@@ -13,6 +14,27 @@ private dchar[] neighbors(dchar[][] grid, int x, int y) {
 		}
 	}
 	return nbs.array;
+}
+
+private dchar[] visibleSeats(dchar[][] grid, int x, int y) {
+	auto vis = Array!dchar();
+	for (int dx = -1; dx <= 1; dx++) {
+		for (int dy = -1; dy <= 1; dy++) {
+			if (dx != 0 || dy != 0) {
+				int nx = x + dx;
+				int ny = y + dy;
+				while (nx >= 0 && nx < grid.length && ny >= 0 && ny < grid[0].length) {
+					if (grid[nx][ny] != FLOOR) {
+						vis.insert(grid[nx][ny]);
+						break;
+					}
+					nx += dx;
+					ny += dy;
+				}
+			}
+		}
+	}
+	return vis.array;
 }
 
 // Higher-order functions are slow, therefore we have some redundancy
@@ -29,10 +51,8 @@ private dchar[][] part1Step(dchar[][] input)
 			const occupiedNbs = nbs.filter!(c => c == OCCUPIED).array;
 
 			if (input[x][y] == EMPTY && occupiedNbs.length == 0) {
-				// Get occupied
 				result[x][y] = OCCUPIED;
 			} else if (input[x][y] == OCCUPIED && occupiedNbs.length >= 4) {
-				// Get empty
 				result[x][y] = EMPTY;
 			}
 
@@ -50,14 +70,12 @@ private dchar[][] part2Step(dchar[][] input)
 
 	for (int x = 0; x < input.length; x++) {
 		for (int y = 0; y < input[0].length; y++) {
-			const nbs = neighbors(input, x, y);
-			const occupiedNbs = nbs.filter!(c => c == OCCUPIED).array;
+			const vis = visibleSeats(input, x, y);
+			const occupiedVis = vis.filter!(c => c == OCCUPIED).array;
 
-			if (input[x][y] == EMPTY && occupiedNbs.length == 0) {
-				// Get occupied
+			if (input[x][y] == EMPTY && occupiedVis.length == 0) {
 				result[x][y] = OCCUPIED;
-			} else if (input[x][y] == OCCUPIED && occupiedNbs.length >= 4) {
-				// Get empty
+			} else if (input[x][y] == OCCUPIED && occupiedVis.length >= 5) {
 				result[x][y] = EMPTY;
 			}
 
