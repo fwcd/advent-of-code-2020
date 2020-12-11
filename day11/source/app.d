@@ -1,4 +1,4 @@
-import std.stdio, std.file, std.array, std.algorithm;
+import std.stdio, std.file, std.array, std.algorithm, std.conv, std.utf;
 
 private char OCCUPIED = '#';
 private char EMPTY = 'L';
@@ -13,7 +13,7 @@ private dchar[] neighbors(dchar[][] grid, int x, int y) {
 
 private dchar[][] step(dchar[][] input)
 {
-	dchar[][] result = new dchar[][](input[0].length, input.length);
+	dchar[][] result = input.map!(xs => xs.array).array;
 	bool changed = false;
 
 	for (int x = 1; x < input[0].length - 1; x++) {
@@ -24,14 +24,12 @@ private dchar[][] step(dchar[][] input)
 			if (occupiedNbs.length == 0) {
 				// Get occupied
 				result[x][y] = OCCUPIED;
-				changed = true;
 			} else if (input[x][y] == OCCUPIED && occupiedNbs.length >= 4) {
 				// Get empty
 				result[x][y] = EMPTY;
-				changed = true;
-			} else {
-				result[x][y] = input[x][y];
 			}
+
+			changed |= input[x][y] != result[x][y];
 		}
 	}
 
@@ -43,13 +41,13 @@ void main()
 	dchar[][] grid = readText("resources/input.txt")
 		.split('\n')
 		.filter!(line => line.length > 0)
-		.map!(line => line.map!(c => cast(dchar) c).array)
+		.map!(line => to!(dchar[])(line.toUTF32))
 		.array;
 
 	bool running = true;
 	int i = 0;
 	while (running) {
-		writefln("%d. iteration", i);
+		writefln("%s", grid.map!(cs => cs.toUTF8).join());
 		dchar[][] next = step(grid);
 		if (next != null) {
 			grid = next;
