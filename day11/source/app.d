@@ -4,7 +4,8 @@ private dchar OCCUPIED = '#';
 private dchar EMPTY = 'L';
 private dchar FLOOR = '.';
 
-private dchar[] neighbors(dchar[][] grid, int x, int y) {
+private dchar[] neighbors(dchar[][] grid, int x, int y)
+{
 	auto nbs = Array!dchar();
 	for (int nx = x - 1; nx <= x + 1; nx++) {
 		for (int ny = y - 1; ny <= y + 1; ny++) {
@@ -16,7 +17,8 @@ private dchar[] neighbors(dchar[][] grid, int x, int y) {
 	return nbs.array;
 }
 
-private dchar[] visibleSeats(dchar[][] grid, int x, int y) {
+private dchar[] visibleSeats(dchar[][] grid, int x, int y)
+{
 	auto vis = Array!dchar();
 	for (int dx = -1; dx <= 1; dx++) {
 		for (int dy = -1; dy <= 1; dy++) {
