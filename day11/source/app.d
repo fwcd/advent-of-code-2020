@@ -1,14 +1,18 @@
-import std.stdio, std.file, std.array, std.algorithm, std.conv, std.utf;
+import std.stdio, std.file, std.array, std.container, std.algorithm, std.conv, std.utf;
 
-private char OCCUPIED = '#';
-private char EMPTY = 'L';
+private dchar OCCUPIED = '#';
+private dchar EMPTY = 'L';
 
 private dchar[] neighbors(dchar[][] grid, int x, int y) {
-	return [
-		grid[x - 1][y - 1], grid[x][y - 1], grid[x + 1][y - 1],
-		grid[x - 1][y],                     grid[x + 1][y],
-		grid[x - 1][y + 1], grid[x][y + 1], grid[x + 1][y + 1]
-	];
+	auto nbs = Array!dchar();
+	for (int nx = x - 1; nx <= x + 1; nx++) {
+		for (int ny = y - 1; ny <= y + 1; ny++) {
+			if ((nx != x || ny != y) && nx >= 0 && nx < grid.length && ny >= 0 && ny < grid[0].length) {
+				nbs.insert(grid[nx][ny]);
+			}
+		}
+	}
+	return nbs.array;
 }
 
 private dchar[][] step(dchar[][] input)
@@ -16,12 +20,12 @@ private dchar[][] step(dchar[][] input)
 	dchar[][] result = input.map!(xs => xs.array).array;
 	bool changed = false;
 
-	for (int x = 1; x < input[0].length - 1; x++) {
-		for (int y = 1; y < input.length - 1; y++) {
+	for (int x = 0; x < input.length; x++) {
+		for (int y = 0; y < input[0].length; y++) {
 			const nbs = neighbors(input, x, y);
 			const occupiedNbs = nbs.filter!(c => c == OCCUPIED).array;
 
-			if (occupiedNbs.length == 0) {
+			if (input[x][y] == EMPTY && occupiedNbs.length == 0) {
 				// Get occupied
 				result[x][y] = OCCUPIED;
 			} else if (input[x][y] == OCCUPIED && occupiedNbs.length >= 4) {
@@ -47,7 +51,7 @@ void main()
 	bool running = true;
 	int i = 0;
 	while (running) {
-		writefln("%s", grid.map!(cs => cs.toUTF8).join());
+		// writefln("%s", grid.map!(cs => cs.toUTF8).join());
 		dchar[][] next = step(grid);
 		if (next != null) {
 			grid = next;
