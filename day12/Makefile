@@ -8,7 +8,10 @@ EXE = $(OUTDIR)/day12
 all: $(EXE)
 
 run: $(EXE)
-	$(EXE)
+	@$(EXE)
 
-$(EXE): $(SRC)
+$(EXE): $(SRC) $(OUTDIR)
 	fpc -FU$(OUTDIR) -FE$(OUTDIR) $(SRC)
+
+$(OUTDIR):
+	mkdir $(OUTDIR)
