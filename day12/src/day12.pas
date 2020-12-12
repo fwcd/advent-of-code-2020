@@ -165,10 +165,10 @@ begin
     with part2Current do begin
         position.x := 0;
         position.y := 0;
-        waypoint.x := -10;
+        waypoint.x := 10;
         waypoint.y := -1;
     end;
-    AssignFile(fileIn, 'resources/example2.txt');
+    AssignFile(fileIn, 'resources/input.txt');
     try
         reset(fileIn);
         while not eof(fileIn) do begin
@@ -176,7 +176,7 @@ begin
             inst := parseInstruction(input);
             part1Current := applyPart1Instruction(part1Current, inst);
             part2Current := applyPart2Instruction(part2Current, inst);
-            writeln('pos x: ', part2Current.position.x, ', y: ', part2Current.position.y, ' - wp x: ', part2Current.waypoint.x, ', y: ', part2Current.waypoint.y);
+            writeln(input, ' - pos x: ', part2Current.position.x, ', y: ', part2Current.position.y, ' - wp x: ', part2Current.waypoint.x, ', y: ', part2Current.waypoint.y);
         end;
     finally
         CloseFile(fileIn);
