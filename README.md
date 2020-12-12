@@ -13,7 +13,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 09: Dart
 - [x] Day 10: PureScript
 - [x] Day 11: D
-- [ ] Day 12: Pascal
+- [x] Day 12: Pascal
 - [ ] Day 13: ?
 - [ ] Day 14: ?
 - [ ] Day 15: ?
