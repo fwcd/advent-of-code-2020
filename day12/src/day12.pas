@@ -8,11 +8,11 @@ uses
 type
     Instruction = record
         action: String;
-        value: Integer;
+        value: LongInt;
     end;
     Position = record
-        x: Integer;
-        y: Integer;
+        x: LongInt;
+        y: LongInt;
     end;
     FacingPosition = record
         position: Position;
@@ -38,9 +38,9 @@ begin
     result := turnLeft(turnLeft(turnLeft(facing)));
 end;
 
-function turn(facing: String; quarters: Integer): String;
+function turn(facing: String; quarters: LongInt): String;
 var
-    i: Integer;
+    i: LongInt;
 begin
     result := facing;
     if quarters > 0 then begin
@@ -54,7 +54,7 @@ begin
     end;
 end;
 
-function movePosition(current: Position; facing: String; value: Integer): Position;
+function movePosition(current: Position; facing: String; value: LongInt): Position;
 begin
     case facing of
         'N': with result do begin
@@ -76,11 +76,11 @@ begin
     end;
 end;
 
-function rotatePosition(position: Position; quarters: Integer): Position;
+function rotatePosition(position: Position; quarters: LongInt): Position;
 begin
     case turn('N', quarters) of
         'N': result := position;
-        'W': with result do begin
+        'E': with result do begin
                 x := -position.y;
                 y := position.x;
             end;
@@ -88,7 +88,7 @@ begin
                 x := -position.x;
                 y := -position.y;
             end;
-        'E': with result do begin
+        'W': with result do begin
                 x := position.y;
                 y := -position.x;
             end;
@@ -103,7 +103,7 @@ begin
     end;
 end;
 
-function scalePosition(a: Position; b: Integer): Position;
+function scalePosition(a: Position; b: LongInt): Position;
 begin
     with result do begin
         x := a.x * b;
@@ -111,7 +111,7 @@ begin
     end;
 end;
 
-function manhattanAbs(p: Position): Integer;
+function manhattanAbs(p: Position): LongInt;
 begin
     result := abs(p.x) + abs(p.y);
 end;
@@ -168,7 +168,7 @@ begin
         waypoint.x := -10;
         waypoint.y := -1;
     end;
-    AssignFile(fileIn, 'resources/input.txt');
+    AssignFile(fileIn, 'resources/example2.txt');
     try
         reset(fileIn);
         while not eof(fileIn) do begin
