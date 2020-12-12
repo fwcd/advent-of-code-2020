@@ -6,6 +6,10 @@ uses
     Sysutils;
 
 type
+    Instruction = record
+        action: String;
+        value: Integer;
+    end;
     Position = record
         x: Integer;
         y: Integer;
@@ -13,6 +17,10 @@ type
     FacingPosition = record
         position: Position;
         facing: String;
+    end;
+    WaypointPosition = record
+        position: Position;
+        waypoint: Position;
     end;
     
 function turnLeft(facing: String): String;
@@ -68,46 +76,57 @@ begin
     end;
 end;
 
-function applyAction(current: FacingPosition; raw: String): FacingPosition;
+function parseInstruction(raw: String): Instruction;
 var
     rawValue: String;
-    action: String;
-    value: Integer;
 begin
     rawValue := copy(raw, 2, length(raw));
-    action := LeftStr(raw, 1);
-    value := StrToInt(rawValue);
-    result := current;
+    with result do begin
+        action := LeftStr(raw, 1);
+        value := StrToInt(rawValue);
+    end;
+end;
 
-    case action of
-        'N', 'W', 'S', 'E': result.position := movePosition(current.position, action, value);
-        'F': result.position := movePosition(current.position, current.facing, value);
-        'L': result.facing := turn(current.facing, -value div 90);
-        'R': result.facing := turn(current.facing, value div 90);
+function applyPart1Instruction(current: FacingPosition; inst: Instruction): FacingPosition;
+begin
+    result := current;
+    case inst.action of
+        'N', 'W', 'S', 'E': result.position := movePosition(current.position, inst.action, inst.value);
+        'F': result.position := movePosition(current.position, current.facing, inst.value);
+        'L': result.facing := turn(current.facing, -inst.value div 90);
+        'R': result.facing := turn(current.facing, inst.value div 90);
     end;
 end;
 
 var
     fileIn: TextFile;
     input: String;
-    current: FacingPosition;
+    inst: Instruction;
+    part1Current: FacingPosition;
+    part2Current: WaypointPosition;
 
 begin
-    with current do begin
+    with part1Current do begin
         position.x := 0;
         position.y := 0;
         facing := 'E';
+    end;
+    with part2Current do begin
+        position.x := 0;
+        position.y := 0;
+        waypoint.x := 0;
+        waypoint.y := 0;
     end;
     AssignFile(fileIn, 'resources/input.txt');
     try
         reset(fileIn);
         while not eof(fileIn) do begin
             readln(fileIn, input);
-            current := applyAction(current, input);
-            writeln('Position: ', current.position.x, ', ', current.position.y, ' > ', current.facing);
+            inst := parseInstruction(input);
+            part1Current := applyPart1Instruction(part1Current, inst);
         end;
     finally
         CloseFile(fileIn);
     end;
-    writeln('Part 1: ', abs(current.position.x) + abs(current.position.y));
+    writeln('Part 1: ', abs(part1Current.position.x) + abs(part1Current.position.y));
 end.
