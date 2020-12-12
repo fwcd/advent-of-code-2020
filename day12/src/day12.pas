@@ -76,6 +76,46 @@ begin
     end;
 end;
 
+function rotatePosition(position: Position; quarters: Integer): Position;
+begin
+    case turn('N', quarters) of
+        'N': result := position;
+        'W': with result do begin
+                x := -position.y;
+                y := position.x;
+            end;
+        'S': with result do begin
+                x := -position.x;
+                y := -position.y;
+            end;
+        'E': with result do begin
+                x := position.y;
+                y := -position.x;
+            end;
+    end;
+end;
+
+function addPosition(a: Position; b: Position): Position;
+begin
+    with result do begin
+        x := a.x + b.x;
+        y := a.y + b.y;
+    end;
+end;
+
+function scalePosition(a: Position; b: Integer): Position;
+begin
+    with result do begin
+        x := a.x * b;
+        y := a.y * b;
+    end;
+end;
+
+function manhattanAbs(p: Position): Integer;
+begin
+    result := abs(p.x) + abs(p.y);
+end;
+
 function parseInstruction(raw: String): Instruction;
 var
     rawValue: String;
@@ -98,6 +138,17 @@ begin
     end;
 end;
 
+function applyPart2Instruction(current: WaypointPosition; inst: Instruction): WaypointPosition;
+begin
+    result := current;
+    case inst.action of
+        'N', 'W', 'S', 'E': result.waypoint := movePosition(current.waypoint, inst.action, inst.value);
+        'F': result.position := addPosition(current.position, scalePosition(current.waypoint, inst.value));
+        'L': result.waypoint := rotatePosition(current.waypoint, -inst.value div 90);
+        'R': result.waypoint := rotatePosition(current.waypoint, inst.value div 90);
+    end;
+end;
+
 var
     fileIn: TextFile;
     input: String;
@@ -114,8 +165,8 @@ begin
     with part2Current do begin
         position.x := 0;
         position.y := 0;
-        waypoint.x := 0;
-        waypoint.y := 0;
+        waypoint.x := -10;
+        waypoint.y := -1;
     end;
     AssignFile(fileIn, 'resources/input.txt');
     try
@@ -124,9 +175,12 @@ begin
             readln(fileIn, input);
             inst := parseInstruction(input);
             part1Current := applyPart1Instruction(part1Current, inst);
+            part2Current := applyPart2Instruction(part2Current, inst);
+            writeln('pos x: ', part2Current.position.x, ', y: ', part2Current.position.y, ' - wp x: ', part2Current.waypoint.x, ', y: ', part2Current.waypoint.y);
         end;
     finally
         CloseFile(fileIn);
     end;
-    writeln('Part 1: ', abs(part1Current.position.x) + abs(part1Current.position.y));
+    writeln('Part 1: ', manhattanAbs(part1Current.position));
+    writeln('Part 2: ', manhattanAbs(part2Current.position));
 end.
