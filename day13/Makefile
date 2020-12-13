@@ -11,7 +11,7 @@ run: $(EXE)
 	$(EXE)
 
 $(EXE): $(SRC) | $(OUTDIR)
-	$(CC) -o $(EXE) $(SRC)
+	$(CC) -o $(EXE) -g $(SRC)
 
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
