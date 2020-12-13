@@ -1,11 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 struct Input {
     int startTs;
     int busses[1024];
     int busCount;
 };
+
+int departureAt(int i, struct Input input) {
+    for (int k = 0; k < input.busCount; k++) {
+        int bus = input.busses[k];
+        if (bus > 0 && i % bus == 0) {
+            return bus;
+        }
+    }
+    return 0;
+}
+
+int part1(struct Input input) {
+    int i = input.startTs;
+    while (!departureAt(i, input)) {
+        i += 1;
+    }
+    return (i - input.startTs) * departureAt(i, input);
+}
 
 int main(void) {
     FILE *file = fopen("resources/input.txt", "r");
@@ -29,6 +48,8 @@ int main(void) {
     fclose(file);
     input.busses[i] = 0;
     input.busCount = i;
+
+    printf("Part 1: %d\n", part1(input));
 
     return 0;
 }
