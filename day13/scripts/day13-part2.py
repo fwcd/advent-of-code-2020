@@ -12,4 +12,5 @@ with open("resources/input.txt", "r") as f:
         for b in l:
             prod *= b
         i += prod
+        print(f'{prod} step @ {i}')
     print(i)
