@@ -59,14 +59,16 @@ floating_raw_addresses(Acc, [B|Bs]) ->
     end.
 
 floating_addresses(Mask) ->
-    lists:map(fun list_to_integer/1, floating_raw_addresses("", Mask)).
+    RawAddrs = floating_raw_addresses("", Mask),
+    % io:fwrite("Addrs: [~s]~n", [lists:join(", ", RawAddrs)]),
+    lists:map(fun(R) -> list_to_integer(R, 2) end, RawAddrs).
 
 decode_part2_mask(Mask, N) ->
     BitCount = length(Mask),
     lists:map(fun({I, B}) ->
         case B of
             $0 ->
-                Bit = (N bsl (BitCount - 1 - I)) band 1,
+                Bit = (N bsr (BitCount - 1 - I)) band 1,
                 [B2|_] = integer_to_list(Bit),
                 B2;
             _ -> B
@@ -78,7 +80,6 @@ part1_handler(Mask, N, X) ->
 
 part2_handler(Mask, N, X) ->
     Mask2 = decode_part2_mask(Mask, N),
-    % io:fwrite("Addrs: [~s]~n", [lists:join(", ", lists:map(fun erlang:integer_to_list/1, floating_addresses(Mask2)))]),
     lists:map(fun(M) -> {M, X} end, floating_addresses(Mask2)).
 
 main(_) ->
