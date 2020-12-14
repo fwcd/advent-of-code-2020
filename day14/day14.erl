@@ -26,14 +26,18 @@ apply_mask(Mask, X) ->
     AndMask = list_to_integer(replace(Mask, $X, $1), 2),
     (X band AndMask) bor OrMask.
 
+set_memory(N, X, Machine) ->
+    Tape = Machine#machine.tape,
+    Tape2 = dict:store(N, X, Tape),
+    Machine#machine{tape=Tape2}.
+
 run_instruction(Inst, Machine, AccessHandler) ->
     case Inst of
         {mask, Rhs} -> Machine#machine{mask=Rhs};
         {mem, N, X} ->
-            #machine{mask=Mask, tape=Tape} = Machine,
-            {M, Y} = AccessHandler(Mask, N, X),
-            Tape2 = dict:store(M, Y, Tape),
-            Machine#machine{tape=Tape2}
+            Mask = Machine#machine.mask,
+            Accesses = AccessHandler(Mask, N, X),
+            lists:foldr(fun({M, Y}, Machine2) -> set_memory(M, Y, Machine2) end, Machine, Accesses)
     end.
 
 run_program([], Machine, _) -> Machine;
@@ -41,14 +45,19 @@ run_program([Inst|Insts], Machine, AccessHandler) ->
     Machine2 = run_instruction(Inst, Machine, AccessHandler),
     run_program(Insts, Machine2, AccessHandler).
 
+sum_memory(Machine) ->
+    lists:sum(lists:map(fun ({_, X}) -> X end, dict:to_list(Machine#machine.tape))).
+
 part1_handler(Mask, N, X) ->
-    {N, apply_mask(Mask, X)}.
+    [{N, apply_mask(Mask, X)}].
 
 main(_) ->
     {ok, BinInput} = file:read_file("resources/input.txt"),
     Input = unicode:characters_to_list(BinInput),
     Prog = parse_program(Input),
     Machine = #machine{},
-    Machine1 = run_program(Prog, Machine, fun part1_handler/3),
-    Part1 = lists:sum(lists:map(fun ({_, X}) -> X end, dict:to_list(Machine1#machine.tape))),
+
+    Part1 = sum_memory(run_program(Prog, Machine, fun part1_handler/3)),
     io:fwrite("Part 1: ~B~n", [Part1]).
+    % Part2 = sum_memory(run_program(Prog, Machine, fun part2_handler/3)),
+    % io:fwrite("Part 2: ~B~n", [Part2]).
