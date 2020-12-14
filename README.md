@@ -15,6 +15,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 11: D
 - [x] Day 12: Pascal
 - [x] Day 13: C
+- [ ] Day 14: Erlang
 - [ ] Day 14: ?
 - [ ] Day 15: ?
 - [ ] Day 16: ?
