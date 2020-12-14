@@ -1,4 +1,4 @@
--module(day13).
+-module(day14).
 -export([main/1]).
 
 main(_) ->

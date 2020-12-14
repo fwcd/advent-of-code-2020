@@ -5,5 +5,5 @@
 To run the program, make sure to have Erlang installed, then run
 
 ```bash
-escript day13.erl
+escript day14.erl
 ```
