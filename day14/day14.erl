@@ -4,13 +4,17 @@
 
 -record(machine, {mask=error, tape=dict:new()}).
 
+replace([], _, _) -> [];
+replace([E|Es], E, G) -> [G|replace(Es, E, G)];
+replace([E|Es], F, G) -> [E|replace(Es, F, G)].
+
 parse_instruction(Raw) ->
     Split = lists:map(fun string:trim/1, string:split(Raw, "=")),
     case Split of
         ["mask", Rhs]          -> {mask, Rhs};
         ["mem" ++ Access, Rhs] -> 
-            {N, _} = string:to_integer(string:slice(Access, 1, string:length(Access) - 2)),
-            {X, _} = string:to_integer(Rhs),
+            N = list_to_integer(string:slice(Access, 1, string:length(Access) - 2)),
+            X = list_to_integer(Rhs),
             {mem, N, X}
     end.
 
@@ -18,8 +22,8 @@ parse_program(Raw) ->
     lists:map(fun(RawInst) -> parse_instruction(RawInst) end, string:tokens(Raw, "\n")).
 
 apply_mask(Mask, X) ->
-    {OrMask, _} = string:to_integer(string:replace(Mask, "X", "0")),
-    {AndMask, _} = string:to_integer(string:replace(Mask, "X", "1")),
+    OrMask = list_to_integer(replace(Mask, $X, $0), 2),
+    AndMask = list_to_integer(replace(Mask, $X, $1), 2),
     (X band AndMask) bor OrMask.
 
 run_instruction(Inst, Machine) ->
@@ -28,7 +32,7 @@ run_instruction(Inst, Machine) ->
         {mem, N, X} ->
             #machine{mask=Mask, tape=Tape} = Machine,
             Y = apply_mask(Mask, X),
-            io:fwrite("At ~B writing ~B~n", [N, X]),
+            io:fwrite("At ~B writing ~B~n", [N, Y]),
             Tape2 = dict:store(N, Y, Tape),
             Machine#machine{tape=Tape2}
     end.
