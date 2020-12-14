@@ -24,7 +24,7 @@ parse_program(Raw) ->
     lists:map(fun(RawInst) -> parse_instruction(RawInst) end, string:tokens(Raw, "\n")).
 
 set_memory(N, X, Machine) ->
-    io:fwrite("memory[~B] <- ~B~n", [N, X]),
+    % io:fwrite("memory[~B] <- ~B~n", [N, X]),
     Tape = Machine#machine.tape,
     Tape2 = dict:store(N, X, Tape),
     Machine#machine{tape=Tape2}.
@@ -83,7 +83,7 @@ part2_handler(Mask, N, X) ->
     lists:map(fun(M) -> {M, X} end, floating_addresses(Mask2)).
 
 main(_) ->
-    {ok, BinInput} = file:read_file("resources/example2.txt"),
+    {ok, BinInput} = file:read_file("resources/input.txt"),
     Input = unicode:characters_to_list(BinInput),
     Prog = parse_program(Input),
     Machine = #machine{},
