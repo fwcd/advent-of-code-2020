@@ -1,4 +1,4 @@
-# Advent of Code - Day 15
+# Advent of Code - Day 16
 
 ## Setup
 
@@ -13,3 +13,4 @@ dotnet restore
 ```bash
 dotnet run
 ```
+
