@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <RootNamespace>day15</RootNamespace>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
