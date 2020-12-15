@@ -45,7 +45,9 @@ Module Program
         End Function).Where(Function (n) Not IsNothing(n)).ToArray()
 
         Dim part1 As Integer = SequenceNth(startingNumbers, 2020)
-
         Console.WriteLine($"Part 1: {part1}")
+
+        Dim part2 As Integer = SequenceNth(startingNumbers, 30000000)
+        Console.WriteLine($"Part 2: {part2}")
     End Sub
 End Module
