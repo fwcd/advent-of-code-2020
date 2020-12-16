@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace day16
 {
     struct Constraint
     {
-        private readonly String name;
+        public readonly string Name;
         private readonly int start;
         private readonly int end;
 
-        public Constraint(String name, int start, int end)
+        public Constraint(string name, int start, int end)
         {
-            this.name = name;
+            Name = name;
             this.start = start;
             this.end = end;
         }
@@ -26,22 +27,27 @@ namespace day16
 
     struct Ticket
     {
-        private readonly List<Constraint> constraints;
-        private readonly List<int> fields;
+        public readonly List<Constraint> Constraints;
+        public readonly List<int> Fields;
 
         public int ErrorRate
         {
             get
             {
-                var constraints = this.constraints;
-                return fields.Where(f => !constraints.Any(c => c.Check(f))).Sum();
+                var constraints = Constraints;
+                return Fields.Where(f => !constraints.Any(c => c.Check(f))).Sum();
             }
+        }
+
+        public bool IsValid
+        {
+            get => ErrorRate == 0;
         }
 
         public Ticket(List<Constraint> constraints, List<int> fields)
         {
-            this.constraints = constraints;
-            this.fields = fields;
+            Constraints = constraints;
+            Fields = fields;
         }
     }
 
@@ -65,11 +71,11 @@ namespace day16
             }
         }
 
-        private static List<Constraint> parseConstraints(ref IEnumerator<String> lines)
+        private static List<Constraint> parseConstraints(ref IEnumerator<string> lines)
         {
             Console.WriteLine("Parsing constraints");
             return lines
-                .TakeWhile(l => !String.IsNullOrWhiteSpace(l))
+                .TakeWhile(l => !string.IsNullOrWhiteSpace(l))
                 .Select(l => l.Split(":").Select(s => s.Trim()).ToList())
                 .SelectMany(l => l[1]
                     .Split("or")
@@ -78,13 +84,36 @@ namespace day16
                 .ToList();
         }
 
-        private static List<Ticket> parseTickets(ref IEnumerator<String> lines, List<Constraint> constraints)
+        private static List<Ticket> parseTickets(ref IEnumerator<string> lines, List<Constraint> constraints)
         {
             Console.WriteLine("Parsing tickets");
             return lines
-                .TakeWhile(l => !String.IsNullOrWhiteSpace(l))
+                .TakeWhile(l => !string.IsNullOrWhiteSpace(l))
                 .Select(l => new Ticket(constraints, l.Split(",").Select(int.Parse).ToList()))
                 .ToList();
+        }
+
+        private static List<List<string>> findFieldNames(List<Ticket> tickets)
+        {
+            var ticket = tickets.First();
+            // First find the name choices for each field
+            var fieldNames = ticket.Fields
+                .Select((_, i) => ticket.Constraints
+                    .GroupBy(c => c.Name)
+                    .Where(cs => tickets.All(t => cs.Any(c => c.Check(t.Fields[i]))))
+                    .Select(cs => cs.Key)
+                    .ToList())
+                .ToList();
+            // Since fields with a single choice are guaranteed to
+            // have that field name, we can safely eliminate this
+            // choice from the other fields.
+            var singles = new HashSet<string>();
+            string single = null;
+            while ((single = fieldNames.Where(cs => cs.Count == 1).Select(cs => cs.First()).Where(c => !singles.Contains(c)).FirstOrDefault()) != null) {
+                fieldNames = fieldNames.Select(cs => cs.Count == 1 ? cs : cs.Where(c => c != single).ToList()).ToList();
+                singles.Add(single);
+            }
+            return fieldNames;
         }
 
         static void Main(string[] args)
@@ -92,12 +121,22 @@ namespace day16
             IEnumerator<string> input = File.ReadAllLines("resources/input.txt").ToList().GetEnumerator();
             var constraints = parseConstraints(ref input);
             input.Skip(1); // 'your ticket:'
-            var myTicket = parseTickets(ref input, constraints);
+            var myTicket = parseTickets(ref input, constraints).Single();
             input.Skip(1); // 'nearby tickets:'
             var nearbyTickets = parseTickets(ref input, constraints);
 
             var part1 = nearbyTickets.Select(t => t.ErrorRate).Sum();
             Console.WriteLine($"Part 1: {part1}");
+
+            var fieldNames = findFieldNames(nearbyTickets.Where(t => t.IsValid).ToList());
+            Console.WriteLine($"Field names: {string.Join(", ", fieldNames.Select(f => string.Join(":", f)))}");
+
+            var part2 = fieldNames
+                .Zip(myTicket.Fields)
+                .Where(z => z.First.First().StartsWith("departure"))
+                .Select(z => new BigInteger(z.Second))
+                .Aggregate((n, m) => n * m);
+            Console.WriteLine($"Part 2: {part2}");
         }
     }
 }
