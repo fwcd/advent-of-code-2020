@@ -5,9 +5,28 @@ using System.Linq;
 
 namespace day16
 {
+    struct Constraint
+    {
+        private readonly String name;
+        private readonly int start;
+        private readonly int end;
+
+        public Constraint(String name, int start, int end)
+        {
+            this.name = name;
+            this.start = start;
+            this.end = end;
+        }
+
+        public bool Check(int value)
+        {
+            return value >= start && value <= end;
+        }
+    }
+
     struct Ticket
     {
-        private readonly List<Predicate<int>> constraints;
+        private readonly List<Constraint> constraints;
         private readonly List<int> fields;
 
         public int ErrorRate
@@ -15,11 +34,11 @@ namespace day16
             get
             {
                 var constraints = this.constraints;
-                return fields.Where(f => !constraints.Any(c => c(f))).Sum();
+                return fields.Where(f => !constraints.Any(c => c.Check(f))).Sum();
             }
         }
 
-        public Ticket(List<Predicate<int>> constraints, List<int> fields)
+        public Ticket(List<Constraint> constraints, List<int> fields)
         {
             this.constraints = constraints;
             this.fields = fields;
@@ -46,20 +65,20 @@ namespace day16
             }
         }
 
-        private static List<Predicate<int>> parseConstraints(ref IEnumerator<String> lines)
+        private static List<Constraint> parseConstraints(ref IEnumerator<String> lines)
         {
             Console.WriteLine("Parsing constraints");
             return lines
                 .TakeWhile(l => !String.IsNullOrWhiteSpace(l))
-                .Select(l => l.Split(":").Select(s => s.Trim()).ToList()[1])
-                .SelectMany(s => s
+                .Select(l => l.Split(":").Select(s => s.Trim()).ToList())
+                .SelectMany(l => l[1]
                     .Split("or")
                     .Select(s => s.Trim().Split("-").Select(int.Parse).ToList())
-                    .Select(r => (Predicate<int>) (i => i >= r[0] && i <= r[1])))
+                    .Select(r => new Constraint(l[0], r[0], r[1])))
                 .ToList();
         }
 
-        private static List<Ticket> parseTickets(ref IEnumerator<String> lines, List<Predicate<int>> constraints)
+        private static List<Ticket> parseTickets(ref IEnumerator<String> lines, List<Constraint> constraints)
         {
             Console.WriteLine("Parsing tickets");
             return lines
@@ -78,7 +97,7 @@ namespace day16
             var nearbyTickets = parseTickets(ref input, constraints);
 
             var part1 = nearbyTickets.Select(t => t.ErrorRate).Sum();
-            Console.WriteLine(string.Join(", ", part1));
+            Console.WriteLine($"Part 1: {part1}");
         }
     }
 }
