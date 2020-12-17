@@ -1,3 +1,9 @@
-# day17
+# Advent of Code - Day 17
 
-A description of this package.
+## Running
+
+First, make sure to have Swift 5.3+ installed, then run
+
+```bash
+swift run
+```
