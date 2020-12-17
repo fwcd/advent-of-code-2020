@@ -1,19 +1,16 @@
 # Advent of Code - Day 18
 
-## Installation
+## Running
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `day18` to your list of dependencies in `mix.exs`:
+First make sure to have Elixir and Mix installed. You can now launch an Elixir REPL by entering
 
-```elixir
-def deps do
-  [
-    {:day18, "~> 0.1.0"}
-  ]
-end
+```bash
+iex
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/day18](https://hexdocs.pm/day18).
+To load and run the program, enter
 
+```elixir
+iex> c "lib/day18.ex"
+iex> Day18.main
+```
