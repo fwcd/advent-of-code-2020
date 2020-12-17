@@ -1,18 +1,10 @@
 defmodule Day18 do
   @moduledoc """
-  Documentation for Day18.
+  Solution for day 18 of AoC 2020 in Elixir.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Day18.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def main do
+    input = File.read!("resources/input.txt") |> String.split("\n")
+    input |> Enum.join(" ")
   end
 end
