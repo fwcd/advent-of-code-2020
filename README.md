@@ -17,8 +17,8 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 13: C
 - [x] Day 14: Erlang
 - [x] Day 15: VB.NET
-- [ ] Day 16: C#
-- [ ] Day 17: ?
+- [x] Day 16: C#
+- [ ] Day 17: Swift
 - [ ] Day 18: ?
 - [ ] Day 19: ?
 - [ ] Day 20: ?
