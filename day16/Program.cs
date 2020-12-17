@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-
 namespace day16
 {
     struct Constraint
@@ -64,7 +63,8 @@ namespace day16
             return elems;
         }
 
-        private static void Skip<T>(this IEnumerator<T> enumerator, int n) {
+        private static void Skip<T>(this IEnumerator<T> enumerator, int n)
+        {
             for (int i = 0; i < n; i++)
             {
                 enumerator.MoveNext();
