@@ -3,21 +3,6 @@ defmodule Day18 do
   Solution for day 18 of AoC 2020 in Elixir.
   """
 
-  require IEx
-
-  def span(list, p) do
-    case list do
-      [] -> {[], []}
-      [x | xs] ->
-        if p.(x) do
-          {as, bs} = span(xs, p)
-          {[x | as], bs}
-        else
-          {[], list}
-        end
-    end
-  end
-
   def tokenize(line) do
     Regex.split(~r/\b|\s+|(?=[\(\)])/, line) |> Enum.filter(fn l -> String.trim(l) != "" end)
   end
@@ -36,33 +21,43 @@ defmodule Day18 do
     end
   end
 
-  def interpret_expr(toks) do
-    IO.puts "#{toks |> Enum.join(", ")}"
+  def parse_primary(toks) do
     case toks do
       ["(" | rest1] ->
-        IO.puts "Spannin'"
         {ts, rest2} = parse_params(rest1)
         n = interpret_expr(ts)
-        interpret_expr([n | rest2])
-      [x] ->
+        {n, rest2}
+      [x | ts] ->
         {n, _} = Integer.parse(x)
-        n
-      [x, op | ts] ->
-        IEx.pry
-        {n, _} = Integer.parse(x)
-        IO.puts "Pars'd"
-        case op do
-          "+" -> n + interpret_expr(ts)
-          "-" -> n - interpret_expr(ts)
-          "*" -> n * interpret_expr(ts)
-          "/" -> n / interpret_expr(ts)
-          _   -> exit "Invalid operator: #{op}"
+        {n, ts}
+      [] -> :error
+    end
+  end
+
+  def interpret_expr(toks) do
+    // IO.inspect toks
+    case parse_primary toks do
+      {n, []} -> n
+      {n, [op | ts]} ->
+        case parse_primary ts do
+          {m, ts2} ->
+            res = case op do
+              "+" -> n + m
+              "-" -> n - m
+              "*" -> n * m
+              "/" -> n / m
+              _   -> exit "Invalid operator: #{op}"
+            end
+            interpret_expr(["#{res}" | ts2])
         end
+        
     end
   end
 
   def main do
     input = File.read!("resources/input.txt") |> String.split("\n")
-    input |> Enum.map(fn l -> l |> tokenize |> interpret_expr end)
+    input |> Enum.filter(fn l -> String.trim(l) != "" end)
+          |> Enum.map(fn l -> l |> tokenize |> interpret_expr end)
+          |> Enum.sum
   end
 end
