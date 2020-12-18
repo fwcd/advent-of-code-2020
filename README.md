@@ -19,7 +19,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 15: VB.NET
 - [x] Day 16: C#
 - [x] Day 17: Swift
-- [ ] Day 18: Elixir
+- [x] Day 18: Elixir
 - [ ] Day 19: ?
 - [ ] Day 20: ?
 - [ ] Day 21: ?
