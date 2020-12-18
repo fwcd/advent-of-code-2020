@@ -4,7 +4,8 @@ Solution for day 18 of AoC 2020 in Elixir.
 """
 
 def tokenize(line) do
-  Regex.split(~r/\b|\s+|(?=[\(\)])/, line) |> Enum.filter(fn l -> String.trim(l) != "" end)
+  Regex.scan(~r/\d+|[\+\*\(\)]/, line)
+      |> Enum.map(fn [c|_] -> c end)
 end
 
 def parse_params(toks, acc \\ [], i \\ 1) do
@@ -51,12 +52,22 @@ def parse_params(toks, acc \\ [], i \\ 1) do
     end
   end
 
+  def interpret_part1_line(raw) do
+    raw |> tokenize |> interpret_expr
+  end
+
   def part2_parenthesize(raw) do
     # Use a clever trick to apply the correct precedences
     inner = raw
-          |> String.replace("*", " ) ) * ( ( ")
-          |> String.replace("+", " ) + ( ")
-    "( ( #{inner} ) )"
+          |> String.replace("(", "(((")
+          |> String.replace(")", ")))")
+          |> String.replace("*", ")) * ((")
+          |> String.replace("+", ") + (")
+    "((#{inner}))"
+  end
+
+  def interpret_part2_line(raw) do
+    raw |> part2_parenthesize |> tokenize |> interpret_expr
   end
 
   def main do
@@ -65,15 +76,12 @@ def parse_params(toks, acc \\ [], i \\ 1) do
           |> Enum.filter(fn l -> String.trim(l) != "" end)
 
     part1 = input
-          |> Enum.map(&tokenize/1)
-          |> Enum.map(&interpret_expr/1)
+          |> Enum.map(&interpret_part1_line/1)
           |> Enum.sum
     IO.puts "Part 1: #{part1}"
 
     part2 = input
-          |> Enum.map(&part2_parenthesize/1)
-          |> Enum.map(&tokenize/1)
-          |> Enum.map(&interpret_expr/1)
+          |> Enum.map(&interpret_part2_line/1)
           |> Enum.sum
     IO.puts "Part 2: #{part2}"
   end
