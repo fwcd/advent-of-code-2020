@@ -1,17 +1,17 @@
 defmodule Day18 do
-  @moduledoc """
-  Solution for day 18 of AoC 2020 in Elixir.
-  """
+@moduledoc """
+Solution for day 18 of AoC 2020 in Elixir.
+"""
 
-  def tokenize(line) do
-    Regex.split(~r/\b|\s+|(?=[\(\)])/, line) |> Enum.filter(fn l -> String.trim(l) != "" end)
-  end
+def tokenize(line) do
+  Regex.split(~r/\b|\s+|(?=[\(\)])/, line) |> Enum.filter(fn l -> String.trim(l) != "" end)
+end
 
-  def parse_params(toks, acc \\ [], i \\ 1) do
-    if i == 0 do
-      [_ | inner] = acc
-      {Enum.reverse(inner), toks}
-    else
+def parse_params(toks, acc \\ [], i \\ 1) do
+  if i == 0 do
+    [_ | inner] = acc
+    {Enum.reverse(inner), toks}
+  else
       case toks do
         [] -> exit "Unmatched parentheses!"
         ["(" | ts] -> parse_params(ts, ["(" | acc], i + 1)
@@ -35,7 +35,6 @@ defmodule Day18 do
   end
 
   def interpret_expr(toks) do
-    // IO.inspect toks
     case parse_primary toks do
       {n, []} -> n
       {n, [op | ts]} ->
@@ -43,9 +42,7 @@ defmodule Day18 do
           {m, ts2} ->
             res = case op do
               "+" -> n + m
-              "-" -> n - m
               "*" -> n * m
-              "/" -> n / m
               _   -> exit "Invalid operator: #{op}"
             end
             interpret_expr(["#{res}" | ts2])
@@ -54,10 +51,30 @@ defmodule Day18 do
     end
   end
 
+  def part2_parenthesize(raw) do
+    # Use a clever trick to apply the correct precedences
+    inner = raw
+          |> String.replace("*", " ) ) * ( ( ")
+          |> String.replace("+", " ) + ( ")
+    "( ( #{inner} ) )"
+  end
+
   def main do
-    input = File.read!("resources/input.txt") |> String.split("\n")
-    input |> Enum.filter(fn l -> String.trim(l) != "" end)
-          |> Enum.map(fn l -> l |> tokenize |> interpret_expr end)
+    input = File.read!("resources/input.txt")
+          |> String.split("\n")
+          |> Enum.filter(fn l -> String.trim(l) != "" end)
+
+    part1 = input
+          |> Enum.map(&tokenize/1)
+          |> Enum.map(&interpret_expr/1)
           |> Enum.sum
+    IO.puts "Part 1: #{part1}"
+
+    part2 = input
+          |> Enum.map(&part2_parenthesize/1)
+          |> Enum.map(&tokenize/1)
+          |> Enum.map(&interpret_expr/1)
+          |> Enum.sum
+    IO.puts "Part 2: #{part2}"
   end
 end
