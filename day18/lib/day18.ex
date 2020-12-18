@@ -1,18 +1,18 @@
 defmodule Day18 do
-@moduledoc """
-Solution for day 18 of AoC 2020 in Elixir.
-"""
-
-def tokenize(line) do
-  Regex.scan(~r/\d+|[\+\*\(\)]/, line)
-      |> Enum.map(fn [c|_] -> c end)
-end
-
-def parse_params(toks, acc \\ [], i \\ 1) do
-  if i == 0 do
-    [_ | inner] = acc
-    {Enum.reverse(inner), toks}
-  else
+  @moduledoc """
+  Solution for day 18 of AoC 2020 in Elixir.
+  """
+  
+  def tokenize(line) do
+    Regex.scan(~r/\d+|[\+\*\(\)]/, line)
+        |> Enum.map(fn [c|_] -> c end)
+  end
+  
+  def parse_params(toks, acc \\ [], i \\ 1) do
+    if i == 0 do
+      [_ | inner] = acc
+      {Enum.reverse(inner), toks}
+    else
       case toks do
         [] -> exit "Unmatched parentheses!"
         ["(" | ts] -> parse_params(ts, ["(" | acc], i + 1)
