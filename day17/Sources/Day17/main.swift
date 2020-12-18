@@ -75,7 +75,7 @@ struct ConwayGrid<P> where P: Point & Hashable {
 }
 
 func main() throws {
-    let input = try String(contentsOf: URL(fileURLWithPath: "Resources/input.txt"))
+    let input = try String(contentsOf: URL(fileURLWithPath: "Resources/example.txt"))
     var grid1 = ConwayGrid<Point3>()
     var grid2 = ConwayGrid<Point4>()
 
@@ -89,9 +89,18 @@ func main() throws {
     }
 
     for i in 0..<6 {
+        let depth = 6
+        for z in -i...i {
+            print("z = \(z)")
+            print((-depth...depth).map { y in
+                (-depth...depth).map { x in
+                    grid1[Point3(x: x, y: y, z: z)] ? "#" : "."
+                }.joined()
+            }.joined(separator: "\n"))
+        }
+
         grid1 = grid1.step()
-        grid2 = grid2.step()
-        print("at \(i): \(grid1.activeCount) - \(grid2.activeCount)")
+        // grid2 = grid2.step()
     }
 
     print("Part 1: \(grid1.activeCount)")
