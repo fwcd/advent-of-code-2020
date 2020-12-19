@@ -2,6 +2,7 @@ module Main where
 
 import Control.Applicative ( (<*), (*>) )
 import Control.Monad ( void )
+import Data.Either ( isRight )
 import Text.Parsec
 import Text.Parsec.String
 
@@ -20,13 +21,19 @@ main :: IO ()
 main = do
     result <- parseFromFile input "resources/example.txt"
     case result of
-        Right i -> putStrLn $ show i
+        Right (Input g es) -> do
+            putStrLn $ "Success fully parsed " ++ show (length g) ++ " rules and " ++ show (length es) ++ " examples!"
+
+            let p = cfgParser g
+                part1 = length $ filter isRight $ map (parse p "input examples") es
+
+            putStrLn $ "Part 1: " ++ show part1
         Left e -> error $ "Parse error: " ++ show e
 
 -- Dynamic parser generation from CFG
 
 cfgParser :: CFG -> Parser ()
-cfgParser g = choice $ map (ruleParser g) g
+cfgParser g = ruleParser g $ lookupRule 0 g
 
 ruleParser :: CFG -> Rule -> Parser ()
 ruleParser g (Rule _ as) = choice $ map (armParser g) as
