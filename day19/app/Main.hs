@@ -25,18 +25,25 @@ main = do
             putStrLn $ "Success fully parsed " ++ show (length g) ++ " rules and " ++ show (length es) ++ " examples!"
 
             let p = cfgParser g
-                part1 = length $ filter isRight $ map (parse p "input examples") es
+                corrects = filter (isRight . parse p "input examples") es
+                part1 = length corrects
+            
+            -- DEBUG:
+            putStrLn $ "Rule: " ++ show (lookupRule 1 g)
+            let rp = sequence_ [symbParser g (Nonterminal 3), symbParser g (Nonterminal 2)] *> eof
+            putStrLn $ "Res: " ++ show (map (parse rp "test") ["babb"])
 
+            putStrLn $ "Correct examples: " ++ show corrects
             putStrLn $ "Part 1: " ++ show part1
         Left e -> error $ "Parse error: " ++ show e
 
 -- Dynamic parser generation from CFG
 
 cfgParser :: CFG -> Parser ()
-cfgParser g = ruleParser g $ lookupRule 0 g
+cfgParser g = ruleParser g (lookupRule 0 g) *> eof
 
 ruleParser :: CFG -> Rule -> Parser ()
-ruleParser g (Rule _ as) = choice $ map (armParser g) as
+ruleParser g (Rule _ as) = choice $ map (try . armParser g) as
 
 armParser :: CFG -> Arm -> Parser ()
 armParser g = sequence_ . map (symbParser g)
