@@ -1,6 +1,7 @@
 module Main where
 
-import Control.Applicative ((<*), (*>))
+import Control.Applicative ( (<*), (*>) )
+import Control.Monad ( void )
 import Text.Parsec
 import Text.Parsec.String
 
@@ -10,12 +11,34 @@ data Rule = Rule Int [Arm] deriving Show
 type CFG = [Rule]
 data Input = Input CFG [String] deriving Show
 
+lookupRule :: Int -> CFG -> Rule
+lookupRule i [] = error $ "No rule for " ++ show i
+lookupRule i (r@(Rule j _) : rs) | i == j    = r
+                                 | otherwise = lookupRule i rs
+
 main :: IO ()
 main = do
     result <- parseFromFile input "resources/example.txt"
     case result of
         Right i -> putStrLn $ show i
         Left e -> error $ "Parse error: " ++ show e
+
+-- Dynamic parser generation from CFG
+
+cfgParser :: CFG -> Parser ()
+cfgParser g = choice $ map (ruleParser g) g
+
+ruleParser :: CFG -> Rule -> Parser ()
+ruleParser g (Rule _ as) = choice $ map (armParser g) as
+
+armParser :: CFG -> Arm -> Parser ()
+armParser g = sequence_ . map (symbParser g)
+
+symbParser :: CFG -> Symbol -> Parser ()
+symbParser _ (Terminal t) = void $ string t
+symbParser g (Nonterminal i) = ruleParser g $ lookupRule i g
+
+-- Input grammar parser
 
 input :: Parser Input
 input = do
