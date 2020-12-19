@@ -1,7 +1,7 @@
 module Main where
 
 import Control.Applicative ( (<*), (*>) )
-import Control.Monad ( void )
+import Control.Monad ( void, guard )
 import Data.Either ( isRight )
 import Data.Functor ( ($>) )
 import Text.Parsec
@@ -22,7 +22,7 @@ data Part = Part1 | Part2
 
 main :: IO ()
 main = do
-    result <- parseFromFile input "resources/example2.txt"
+    result <- parseFromFile input "resources/input.txt"
     case result of
         Right (Input g es) -> do
             putStrLn $ "Success fully parsed " ++ show (length g) ++ " rules and " ++ show (length es) ++ " examples!"
@@ -41,25 +41,12 @@ main = do
 cfgParser :: Part -> CFG -> Parser ()
 cfgParser p g = ruleParser p g (lookupRule 0 g) *> eof
 
--- Note how we cannot use the standard many/optional combinators, since we do not want greedy matching
--- We therefore refactor the rules:
---
---     0: 8 11
---     8: 42 | 42 8
---     11: 42 31 | 42 11 31
---
--- into
---
---     0: 8 (31 | 11)
---     8: 42 42+    <-- note how the last 42 was previously matched by 11, but is now matched greedily
---     11: 42 11 31
---
 ruleParser :: Part -> CFG -> Rule -> Parser ()
-ruleParser Part2 g (Rule 0  as) = ruleParser Part2 g (lookupRule 8 g) <* (try (ruleParser Part2 g (lookupRule 11 g)) <|> ruleParser Part2 g (lookupRule 31 g))
-ruleParser Part2 g (Rule 8  as) = ruleParser Part1 g (lookupRule 42 g) <* many1 (ruleParser Part1 g (lookupRule 42 g))
-ruleParser Part2 g (Rule 11 as) = void $ between (ruleParser Part1 g (lookupRule 42 g))
-                                                 (ruleParser Part1 g (lookupRule 31 g))
-                                                 (optionMaybe (ruleParser Part2 g (Rule 11 as)))
+ruleParser Part2 g (Rule 0  as) = do
+    -- Observe how the pattern is 42 ... + 42 42 ... 31 31
+    fs <- many1 $ ruleParser Part1 g $ lookupRule 42 g
+    ts <- many1 $ ruleParser Part1 g $ lookupRule 31 g
+    guard $ length fs > length ts
 ruleParser p     g (Rule _  as) = choice $ map (try . armParser p g) as
 
 armParser :: Part -> CFG -> Arm -> Parser ()
