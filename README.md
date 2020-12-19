@@ -20,7 +20,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 16: C#
 - [x] Day 17: Swift
 - [x] Day 18: Elixir
-- [ ] Day 19: ?
+- [x] Day 19: Haskell
 - [ ] Day 20: ?
 - [ ] Day 21: ?
 - [ ] Day 22: ?
