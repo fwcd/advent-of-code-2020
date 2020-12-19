@@ -19,7 +19,7 @@ lookupRule i (r@(Rule j _) : rs) | i == j    = r
 
 main :: IO ()
 main = do
-    result <- parseFromFile input "resources/example.txt"
+    result <- parseFromFile input "resources/input.txt"
     case result of
         Right (Input g es) -> do
             putStrLn $ "Success fully parsed " ++ show (length g) ++ " rules and " ++ show (length es) ++ " examples!"
@@ -28,12 +28,6 @@ main = do
                 corrects = filter (isRight . parse p "input examples") es
                 part1 = length corrects
             
-            -- DEBUG:
-            putStrLn $ "Rule: " ++ show (lookupRule 1 g)
-            let rp = sequence_ [symbParser g (Nonterminal 3), symbParser g (Nonterminal 2)] *> eof
-            putStrLn $ "Res: " ++ show (map (parse rp "test") ["babb"])
-
-            putStrLn $ "Correct examples: " ++ show corrects
             putStrLn $ "Part 1: " ++ show part1
         Left e -> error $ "Parse error: " ++ show e
 
