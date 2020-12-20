@@ -60,7 +60,7 @@ public:
         return ids == other.ids && lines == other.lines;
     }
 
-    std::size_t hash() const {
+    std::size_t hashValue() const {
         std::size_t result{0};
         for (const std::vector<int>& idsLine : ids) {
             for (int id : idsLine) {
@@ -119,7 +119,7 @@ public:
             }
         }
         
-        return Tile(ids, newLines);
+        return Tile(newIds, newLines);
     }
 
     /** Tries to glue the top of this tile with the bottom of the other. */
@@ -143,6 +143,16 @@ public:
             result.push_back('\n');
         }
 
+        for (const std::vector<int>& idLine : ids) {
+            std::string line;
+            for (int id : idLine) {
+                line += std::to_string(id);
+                line.push_back(' ');
+            }
+            result += line;
+            result.push_back('\n');
+        }
+
         return result;
     }
 };
@@ -151,7 +161,7 @@ namespace std {
     template<>
     struct hash<Tile> {
         std::size_t operator()(const Tile& tile) const {
-            return tile.hash();
+            return tile.hashValue();
         }
     };
 }
@@ -164,8 +174,11 @@ public:
         int i{static_cast<int>(tiles.size())};
         std::vector<std::string> linesMut{lines};
         std::regex headerPattern{"Tile: (\\d+)"};
-        std::string header{linesMut[0]};
+        std::string header{linesMut.front()};
         linesMut.erase(linesMut.begin());
+        while (linesMut.back().empty()) {
+            linesMut.pop_back();
+        }
         Tile tile{{{i}}, linesMut};
         tiles.insert(tile);
     }
@@ -174,12 +187,16 @@ public:
         std::unordered_set<Tile> remaining{tiles};
 
         while (remaining.size() > 1) {
-            for (const Tile& a : remaining) {
-                for (const Tile& b : remaining) {
+            std::cout << remaining.size() << " tile(s) left" << std::endl;
+
+            for (Tile a : remaining) {
+                for (Tile b : remaining) {
                     for (int sideA = Top; sideA <= Left; sideA++) {
                         for (int sideB = Top; sideB <= Left; sideB++) {
                             std::optional<Tile> glued{a.rotate(static_cast<Side>(sideA)).glue(b.rotate(static_cast<Side>(sideB)))};
                             if (glued.has_value()) {
+                                std::cout << "GLUED:" << std::endl;
+                                std::cout << glued->toString() << std::endl;
                                 remaining.erase(a);
                                 remaining.erase(b);
                                 remaining.insert(*glued);
@@ -190,6 +207,10 @@ public:
                 }
             }
             outer: {}
+            
+            for (const Tile& tile : tiles) {
+                std::cout << tile.toString() << std::endl;
+            }
         }
 
         return *remaining.begin();
@@ -229,27 +250,17 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    // std::ifstream file{"resources/example.txt"};
-    // std::stringstream ss;
-    // ss << file.rdbuf();
+    std::ifstream file{"resources/example.txt"};
+    std::stringstream ss;
+    ss << file.rdbuf();
 
-    // std::string input{ss.str()};
-    // Jigsaw jigsaw{parseJigsaw(input)};
+    std::string input{ss.str()};
+    Jigsaw jigsaw{parseJigsaw(input)};
 
-    Tile test{
-        {{0}},
-        {
-            "abc",
-            "def"
-        }
-    };
-    auto t = test.rotate(3);
-    std::cout << t.toString() << std::endl << test.rotate(2).toString() << std::endl;
+    std::cout << jigsaw.getTiles().size() << " tiles parsed!" << std::endl;
 
-    // std::cout << jigsaw.getTiles().size() << " tiles parsed!" << std::endl;
-
-    // Tile result{jigsaw.solve()};
-    // std::cout << result.toString() << std::endl;
+    Tile result{jigsaw.solve()};
+    std::cout << result.toString() << std::endl;
 
     return 0;
 }
