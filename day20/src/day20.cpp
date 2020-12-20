@@ -288,7 +288,7 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    std::ifstream file{"resources/example.txt"};
+    std::ifstream file{"resources/input.txt"};
     std::stringstream ss;
     ss << file.rdbuf();
 
