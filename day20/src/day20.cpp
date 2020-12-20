@@ -80,21 +80,45 @@ public:
             return Vec2(0, lines.size() - 1);
         }
     }
+
+    Vec2 getIdsCorner(Side side) const {
+        switch (side) {
+        case Top:
+            return Vec2(0, 0);
+        case Right:
+            return Vec2(ids[0].size() - 1, 0);
+        case Bottom:
+            return Vec2(ids[0].size() - 1, ids.size() - 1);
+        case Left:
+            return Vec2(0, ids.size() - 1);
+        }
+    }
     
     Tile rotate(int quarters) const {
-        std::vector<std::string> result{lines};
-        Vec2 offset{getCorner(Side(quarters % 4))};
+        std::vector<std::string> newLines{lines};
+        std::vector<std::vector<int>> newIds{ids};
+
+        Side side{Side(quarters % 4)};
+        Vec2 offset{getCorner(side)};
+        Vec2 idsOffset{getIdsCorner(side)};
         Vec2 dx{Vec2(1, 0).rotate(quarters)};
         Vec2 dy{dx.rotate(1)};
-        
+
         for (int y = 0; y < lines.size(); y++) {
             for (int x = 0; x < lines[y].size(); x++) {
                 Vec2 target{offset + (dy * y) + (dx * x)};
-                result[target.y][target.x] = lines[y][x];
+                newLines[target.y][target.x] = lines[y][x];
+            }
+        }
+
+        for (int y = 0; y < ids.size(); y++) {
+            for (int x = 0; x < ids[y].size(); x++) {
+                Vec2 target{idsOffset + (dy * y) + (dx * x)};
+                newIds[target.y][target.x] = ids[y][x];
             }
         }
         
-        return Tile(ids, result);
+        return Tile(ids, newLines);
     }
 
     /** Tries to glue the top of this tile with the bottom of the other. */
