@@ -289,7 +289,7 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    std::ifstream file{"resources/input.txt"};
+    std::ifstream file{"resources/example.txt"};
     std::stringstream ss;
     ss << file.rdbuf();
 
@@ -323,6 +323,8 @@ int main() {
             br = pos;
             brTile = i;
         }
+
+        std::cout << "at " << pos.x << ", " << pos.y << ": " << jigsaw.tiles[i].id << std::endl;
     }
 
     unsigned long long tlId = jigsaw.tiles[tlTile].id, trId = jigsaw.tiles[trTile].id, blId = jigsaw.tiles[blTile].id, brId = jigsaw.tiles[brTile].id;
