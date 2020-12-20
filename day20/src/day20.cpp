@@ -15,8 +15,12 @@ enum Side {
     Left
 };
 
+Side rotateSide(Side s, int n) {
+    return static_cast<Side>((s + n) % 4);
+}
+
 Side oppositeSide(Side s) {
-    return static_cast<Side>((s + 2) % 4);
+    return rotateSide(s, 2);
 }
 
 std::string sideToString(Side s) {
@@ -38,12 +42,14 @@ private:
 public:
     int id;
     int parent;
+    bool flipped;
     std::unordered_map<Side, std::optional<int>> neighbors;
 
     Tile(int parent, int id, const std::vector<std::string>& lines) :
         id(id),
         lines(lines),
         parent(parent),
+        flipped(false),
         neighbors({{Top, std::nullopt}, {Left, std::nullopt}, {Bottom, std::nullopt}, {Right, std::nullopt}}) {}
 
     std::string getEdge(Side side) {
@@ -68,7 +74,15 @@ public:
             break;
         }
 
+        if (flipped) {
+            std::reverse(result.begin(), result.end());
+        }
+
         return result;
+    }
+
+    void flip() {
+        flipped = !flipped;
     }
 
     const std::string toString() const {
@@ -117,18 +131,49 @@ public:
             for (int i = 0; i < count; i++) {
                 for (int j = 0; j < count; j++) {
                     if (findRoot(i) != findRoot(j)) {
-                        for (int sa = Top; sa <= Left; sa++) {
-                            for (int sb = Top; sb <= Left; sb++) {
-                                Side sideA{static_cast<Side>(sa)};
-                                Side sideB{static_cast<Side>(sb)};
+                        Tile& a = tiles[i];
+                        Tile& b = tiles[j];
 
-                                if (tiles[i].getEdge(sideA) == tiles[j].getEdge(sideB)) {
-                                    connect(i, j, sideA, sideB);
-                                    std::cout << roots.size() << " disjoint pieces (joined " << tiles[i].id << " " << sideToString(sideA) << " with "
-                                                                                             << tiles[j].id << " " << sideToString(sideB) << ")!" << std::endl;
+                        for (Side sideA : {Top, Left, Bottom, Right}) {
+                            for (Side sideB : {Top, Left, Bottom, Right}) {
+                                for (bool aFlipped : {false, true}) {
+                                    for (bool bFlipped : {false, true}) {
+                                        setOrientation(i, aFlipped);
+                                        setOrientation(j, bFlipped);
+
+                                        if (a.getEdge(sideA) == b.getEdge(sideB)) {
+                                            connect(i, j, sideA, sideB);
+                                            std::cout << roots.size() << " disjoint pieces (joined " << a.id << " " << sideToString(sideA) << " with "
+                                                                                                    << b.id << " " << sideToString(sideB) << ")!" << std::endl;
+                                        }
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    void setOrientation(int i, bool flipped) {
+        std::unordered_set<int> visited;
+        setOrientation(i, flipped, visited);
+    }
+
+    void setOrientation(int i, bool flipped, std::unordered_set<int>& visited) {
+        if (!visited.contains(i)) {
+            visited.insert(i);
+            Tile& tile = tiles[i];
+            bool shouldFlip = flipped != tile.flipped;
+
+            if (shouldFlip) {
+                tile.flip();
+
+                for (Side side : {Top, Left, Bottom, Right}) {
+                    std::optional<int> neighbor = tile.neighbors[side];
+                    if (neighbor.has_value()) {
+                        setOrientation(*neighbor, !tiles[*neighbor].flipped, visited);
                     }
                 }
             }
