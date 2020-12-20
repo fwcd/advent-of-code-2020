@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <regex>
@@ -7,6 +8,19 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+struct Vec2 {
+    int x;
+    int y;
+
+    Vec2() : Vec2(0, 0) {}
+
+    Vec2(int x, int y) : x(x), y(y) {}
+
+    Vec2 operator+(Vec2 rhs) {
+        return Vec2(x + rhs.x, y + rhs.y);
+    }
+};
 
 enum Side {
     Top = 0,
@@ -21,6 +35,19 @@ Side rotateSide(Side s, int n) {
 
 Side oppositeSide(Side s) {
     return rotateSide(s, 2);
+}
+
+Vec2 sideToDir(Side s) {
+    switch (s) {
+    case Top:
+        return Vec2(0, -1);
+    case Right:
+        return Vec2(1, 0);
+    case Bottom:
+        return Vec2(0, 1);
+    case Left:
+        return Vec2(-1, 0);
+    }
 }
 
 std::string sideToString(Side s) {
@@ -144,7 +171,7 @@ public:
                                         if (a.getEdge(sideA) == b.getEdge(sideB)) {
                                             connect(i, j, sideA, sideB);
                                             std::cout << roots.size() << " disjoint pieces (joined " << a.id << " " << sideToString(sideA) << " with "
-                                                                                                    << b.id << " " << sideToString(sideB) << ")!" << std::endl;
+                                                                                                     << b.id << " " << sideToString(sideB) << ")!" << std::endl;
                                         }
                                     }
                                 }
@@ -211,6 +238,29 @@ public:
 
         return roots;
     }
+
+    std::unordered_map<int, Vec2> toGrid() {
+        if (roots.size() > 1) {
+            throw std::runtime_error("Please solve the puzzle before converting to a grid!");
+        }
+        std::unordered_map<int, Vec2> grid;
+        dfsToGrid(0, Vec2(0, 0), grid);
+        return grid;
+    }
+
+    void dfsToGrid(int i, Vec2 pos, std::unordered_map<int, Vec2>& grid) {
+        if (!grid.contains(i)) {
+            grid[i] = pos;
+            Tile& tile = tiles[i];
+
+            for (Side side : {Top, Left, Bottom, Right}) {
+                std::optional<int> neighbor = tile.neighbors[side];
+                if (neighbor.has_value()) {
+                    dfsToGrid(*neighbor, pos + sideToDir(side), grid);
+                }
+            }
+        }
+    }
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delim) {
@@ -248,6 +298,7 @@ int main() {
     std::cout << jigsaw.tiles.size() << " tiles parsed!" << std::endl;
 
     jigsaw.solve();
+    std::unordered_map<int, Vec2> grid{jigsaw.toGrid()};
 
     return 0;
 }
