@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -21,7 +22,11 @@ private:
 public:
     void addTile(const std::vector<std::string>& lines) {
         int i{static_cast<int>(tiles.size())};
-        Tile tile{i, lines};
+        std::vector<std::string> linesMut{lines};
+        std::regex headerPattern{"Tile: (\\d+)"};
+        std::string header{linesMut[0]};
+        linesMut.erase(linesMut.begin());
+        Tile tile{i, linesMut};
         tiles.push_back(tile);
     }
     
@@ -51,7 +56,7 @@ Jigsaw parseJigsaw(const std::string& raw) {
     Jigsaw jigsaw;
 
     for (auto rawTile : split(raw, "\n\n")) {
-        jigsaw.addTile(split(rawTile, " "));
+        jigsaw.addTile(split(rawTile, "\n"));
     }
 
     return jigsaw;
