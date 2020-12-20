@@ -14,29 +14,34 @@ enum Side {
     Left
 };
 
+template<typename T>
 class Vec2 {
 public:
-    int x;
-    int y;
+    T x;
+    T y;
     
-    Vec2(int x, int y) : x(x), y(y) {}
+    Vec2(T x, T y) : x(x), y(y) {}
     
-    Vec2 operator+(Vec2 rhs) const {
+    Vec2<T> operator+(Vec2<T> rhs) const {
         return Vec2(x + rhs.x, y + rhs.y);
     }
     
-    Vec2 operator*(int scale) const {
+    Vec2<T> operator*(T scale) const {
         return Vec2(x * scale, y * scale);
     }
     
-    Vec2 rotate(int quarters) const {
-        Vec2 result{*this};
+    Vec2<T> rotate(int quarters) const {
+        Vec2<T> result{*this};
         for (int i = 0; i < (quarters % 4); i++) {
-            int tmp = result.x;
+            int tmp{result.x};
             result.x = -result.y;
             result.y = tmp;
         }
         return result;
+    }
+
+    Vec2<T> abs() const {
+        return Vec2(std::abs(x), std::abs(y));
     }
 };
 
@@ -47,7 +52,7 @@ private:
 public:
     Tile(const std::vector<std::vector<int>>& ids, const std::vector<std::string>& lines) : ids(ids), lines(lines) {}
     
-    char operator[](Vec2 pos) const {
+    char operator[](Vec2<int> pos) const {
         return lines[pos.y][pos.x];
     }
 
@@ -62,47 +67,43 @@ public:
                 result ^= std::hash<int>()(id);
             }
         }
-        for (const std::string& line : lines) {
-            result ^= std::hash<std::string>()(line);
-        }
         return result;
     }
     
-    Vec2 getCorner(Side side) const {
-        switch (side) {
-        case Top:
-            return Vec2(0, 0);
-        case Right:
-            return Vec2(lines[0].size() - 1, 0);
-        case Bottom:
-            return Vec2(lines[0].size() - 1, lines.size() - 1);
-        case Left:
-            return Vec2(0, lines.size() - 1);
-        }
-    }
-
-    Vec2 getIdsCorner(Side side) const {
-        switch (side) {
-        case Top:
-            return Vec2(0, 0);
-        case Right:
-            return Vec2(ids[0].size() - 1, 0);
-        case Bottom:
-            return Vec2(ids[0].size() - 1, ids.size() - 1);
-        case Left:
-            return Vec2(0, ids.size() - 1);
-        }
-    }
-    
     Tile rotate(int quarters) const {
-        std::vector<std::string> newLines{lines};
-        std::vector<std::vector<int>> newIds{ids};
+        Vec2<int> offset{0, 0};
+        Vec2<int> idsOffset{0, 0};
+        Vec2<int> dx{1, 0};
+        Vec2<int> dy{0, 1};
+        Vec2<int> newSize{static_cast<int>(lines[0].size()), static_cast<int>(lines.size())};
+        Vec2<int> newIdSize{static_cast<int>(ids[0].size()), static_cast<int>(ids.size())};
 
-        Side side{Side(quarters % 4)};
-        Vec2 offset{getCorner(side)};
-        Vec2 idsOffset{getIdsCorner(side)};
-        Vec2 dx{Vec2(1, 0).rotate(quarters)};
-        Vec2 dy{dx.rotate(1)};
+        dx = dx.rotate(quarters);
+        dy = dy.rotate(quarters);
+        newSize = newSize.rotate(quarters).abs();
+        newIdSize = newIdSize.rotate(quarters).abs();
+
+        switch (quarters % 4) {
+        case 0:
+            offset = Vec2(0, 0);
+            idsOffset = Vec2(0, 0);
+            break;
+        case 1:
+            offset = Vec2(newSize.x - 1, 0);
+            idsOffset = Vec2(newIdSize.x - 1, 0);
+            break;
+        case 2:
+            offset = Vec2(newSize.x - 1, newSize.y - 1);
+            idsOffset = Vec2(newIdSize.x - 1, newIdSize.y - 1);
+            break;
+        case 3:
+            offset = Vec2(0, newSize.y - 1);
+            idsOffset = Vec2(0, newIdSize.y - 1);
+            break;
+        }
+
+        std::vector<std::string> newLines{static_cast<std::size_t>(newSize.y), std::string(static_cast<std::size_t>(newSize.x), ' ')};
+        std::vector<std::vector<int>> newIds{static_cast<std::size_t>(newIdSize.y), std::vector(static_cast<std::size_t>(newIdSize.x), 0)};
 
         for (int y = 0; y < lines.size(); y++) {
             for (int x = 0; x < lines[y].size(); x++) {
@@ -125,8 +126,10 @@ public:
     std::optional<Tile> glue(Tile other) const {
         if (lines[0] == other.lines[other.lines.size() - 1]) {
             std::vector<std::string> combined;
+            std::vector<std::vector<int>> combinedIds;
             std::merge(lines.begin(), lines.end(), other.lines.begin(), other.lines.end(), std::back_inserter(combined));
-            return Tile(ids, combined);
+            std::merge(ids.begin(), ids.end(), other.ids.begin(), other.ids.end(), std::back_inserter(combinedIds));
+            return Tile(combinedIds, combined);
         } else {
             return std::nullopt;
         }
@@ -166,6 +169,31 @@ public:
         Tile tile{{{i}}, linesMut};
         tiles.insert(tile);
     }
+
+    Tile solve() const {
+        std::unordered_set<Tile> remaining{tiles};
+
+        while (remaining.size() > 1) {
+            for (const Tile& a : remaining) {
+                for (const Tile& b : remaining) {
+                    for (int sideA = Top; sideA <= Left; sideA++) {
+                        for (int sideB = Top; sideB <= Left; sideB++) {
+                            std::optional<Tile> glued{a.rotate(static_cast<Side>(sideA)).glue(b.rotate(static_cast<Side>(sideB)))};
+                            if (glued.has_value()) {
+                                remaining.erase(a);
+                                remaining.erase(b);
+                                remaining.insert(*glued);
+                                goto outer;
+                            }
+                        }
+                    }
+                }
+            }
+            outer: {}
+        }
+
+        return *remaining.begin();
+    }
     
     int size() const {
         return tiles.size();
@@ -201,13 +229,27 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    std::ifstream file{"resources/example.txt"};
-    std::stringstream ss;
-    ss << file.rdbuf();
+    // std::ifstream file{"resources/example.txt"};
+    // std::stringstream ss;
+    // ss << file.rdbuf();
 
-    std::string input{ss.str()};
-    Jigsaw jigsaw{parseJigsaw(input)};
+    // std::string input{ss.str()};
+    // Jigsaw jigsaw{parseJigsaw(input)};
 
-    std::cout << jigsaw.getTiles().size() << " tiles parsed!" << std::endl;
+    Tile test{
+        {{0}},
+        {
+            "abc",
+            "def"
+        }
+    };
+    auto t = test.rotate(3);
+    std::cout << t.toString() << std::endl << test.rotate(2).toString() << std::endl;
+
+    // std::cout << jigsaw.getTiles().size() << " tiles parsed!" << std::endl;
+
+    // Tile result{jigsaw.solve()};
+    // std::cout << result.toString() << std::endl;
+
     return 0;
 }
