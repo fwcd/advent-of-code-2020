@@ -72,7 +72,7 @@ public:
     bool flipped;
     std::unordered_map<Side, std::optional<int>> neighbors;
 
-    Tile(int parent, int id, const std::vector<std::string>& lines) :
+    Tile(int parent, unsigned long long id, const std::vector<std::string>& lines) :
         id(id),
         lines(lines),
         parent(parent),
@@ -140,7 +140,7 @@ public:
         std::smatch matches;
 
         std::regex_search(header, matches, headerPattern);
-        int id{std::stoi(matches[1])};
+        auto id{static_cast<unsigned long long>(std::stoi(matches[1]))};
 
         linesMut.erase(linesMut.begin());
         while (linesMut.back().empty()) {
@@ -299,6 +299,34 @@ int main() {
 
     jigsaw.solve();
     std::unordered_map<int, Vec2> grid{jigsaw.toGrid()};
+    
+    // Find the corners
+
+    Vec2 tl, tr, bl, br;
+    int tlTile, trTile, blTile, brTile;
+
+    for (const auto& [i, pos] : grid) {
+        if (pos.x < tl.x || pos.y < tl.y) {
+            tl = pos;
+            tlTile = i;
+        }
+        if (pos.x > tr.x || pos.y < tr.y) {
+            tr = pos;
+            trTile = i;
+        }
+        if (pos.x < bl.x || pos.y > bl.y) {
+            bl = pos;
+            blTile = i;
+        }
+        if (pos.x > br.x || pos.y > br.y) {
+            br = pos;
+            brTile = i;
+        }
+    }
+
+    unsigned long long tlId = jigsaw.tiles[tlTile].id, trId = jigsaw.tiles[trTile].id, blId = jigsaw.tiles[blTile].id, brId = jigsaw.tiles[brTile].id;
+    std::cout << "Corners: " << tlId << ", " << trId << ", " << blId << ", " << brId << std::endl;
+    std::cout << "Part 1: " << (tlId * trId * blId * brId) << std::endl;
 
     return 0;
 }
