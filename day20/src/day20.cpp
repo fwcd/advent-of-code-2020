@@ -172,6 +172,7 @@ public:
                                             connect(i, j, sideA, sideB);
                                             std::cout << roots.size() << " disjoint pieces (joined " << a.id << " " << sideToString(sideA) << " with "
                                                                                                      << b.id << " " << sideToString(sideB) << ")!" << std::endl;
+                                            goto outer;
                                         }
                                     }
                                 }
@@ -180,6 +181,7 @@ public:
                     }
                 }
             }
+            outer: {}
         }
     }
 
@@ -225,8 +227,7 @@ public:
 
         tiles[i].neighbors[sideA] = j;
         tiles[j].neighbors[sideB] = i;
-        tiles[i].parent = root1;
-        tiles[j].parent = root1;
+        tiles[root2].parent = root1;
     }
     
     std::unordered_set<int> findRoots() const {
