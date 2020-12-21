@@ -9,15 +9,15 @@ data class Food(
     val allergens: List<String>
 )
 
-fun satisfies(foods: List<Food>, assignment: Map<String, String>): Boolean =
+fun satisfies(foods: List<Food>, assignment: Map<String, String?>): Boolean =
     foods.all { food -> food.allergens.all { allergen -> food.ingredients.any { assignment[it] == allergen } } }
 
-fun solveAllergens(ingreds: List<String>, allergens: Set<String>, foods: List<Food>, assignment: MutableMap<String, String>): Boolean {
+fun solveAllergens(ingreds: List<String>, allergens: List<String>, foods: List<Food>, assignment: MutableMap<String, String?>): Boolean {
     if (ingreds.isEmpty()) {
         return satisfies(foods, assignment)
     } else {
         val ingred = ingreds.last()
-        for (allergen in allergens) {
+        for (allergen in listOf(null) + allergens.filterNot { assignment.values.contains(it) }) {
             assignment[ingred] = allergen
             if (solveAllergens(ingreds.dropLast(1), allergens, foods, assignment)) {
                 return true
@@ -35,9 +35,11 @@ fun main(args: Array<String>) {
     
     val ingreds = foods.flatMap { it.ingredients }.toSet()
     val allergens = foods.flatMap { it.allergens }.toSet()
-    var assignment = mutableMapOf<String, String>()
+    var assignment = mutableMapOf<String, String?>()
     
-    if (solveAllergens(ingreds.toList(), allergens, foods, assignment)) {
-        print("Part 1: $assignment")
+    if (solveAllergens(ingreds.toList(), allergens.toList(), foods, assignment)) {
+        println("$assignment")
+        val safeIngreds = assignment.filter { it.value == null }.map { it.key }
+        println("Part 1: ${safeIngreds.map { ingred -> foods.map { it.ingredients.count { it == ingred } }.sum() }.sum()}")
     }
 }
