@@ -71,19 +71,18 @@ std::string sideToString(Side s) {
 }
 
 class Tile {
-public:
+private:
     std::vector<std::string> lines;
+public:
     unsigned long long id;
     bool flipped;
     int rotation;
-    std::unordered_map<Side, std::optional<int>> neighbors;
 
     Tile(unsigned long long id, const std::vector<std::string>& lines) :
         lines(lines),
         id(id),
         flipped(false),
-        rotation(0),
-        neighbors({{Top, std::nullopt}, {Left, std::nullopt}, {Bottom, std::nullopt}, {Right, std::nullopt}}) {}
+        rotation(0) {}
     
     std::string rawRow(int i) const {
         return lines[i];
@@ -139,6 +138,20 @@ public:
 
     int height() const {
         return rotation % 2 == 0 ? lines.size() : lines[0].size();
+    }
+
+    int count(char c) const {
+        int occurrences{0};
+
+        for (const std::string& rawLine : lines) {
+            for (char d : rawLine) {
+                if (c == d) {
+                    occurrences++;
+                }
+            }
+        }
+
+        return occurrences;
     }
 
     const std::string str() const {
@@ -316,7 +329,7 @@ public:
             for (int ty = pad; ty < tileHeight - pad; ty++) {
                 for (int x = minCorner.x; x <= maxCorner.x; x++) {
                     for (int tx = pad; tx < tileWidth - pad; tx++) {
-                        sts << tiles[grid[y][x]].lines[ty][tx];
+                        sts << tiles[grid[y][x]].row(ty)[tx];
                     }
                     if (withSpaces) {
                         sts << ' ';
@@ -403,8 +416,13 @@ int main() {
             monster.rotation = rot;
             monster.flipped = flip;
 
+            if (map.tryPlacing(monster)) {
+                int count = map.count('#');
+                std::cout << "Part 2: " << count << std::endl;
+                return 0;
+            }
         }
     }
 
-    return 0;
+    return -1;
 }
