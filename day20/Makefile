@@ -12,7 +12,7 @@ run: $(EXE)
 	@$(EXE)
 
 $(EXE): $(SRC) $(OUTDIR)
-	clang++ -Ofast -std=c++2a -Wall -o $(EXE) $(SRC)
+	clang++ -O2 -std=c++2a -Wall -o $(EXE) $(SRC)
 
 $(OUTDIR):
 	mkdir -p $(OUTDIR)

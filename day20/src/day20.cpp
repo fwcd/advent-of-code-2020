@@ -84,7 +84,7 @@ public:
     std::string getEdge(Side side) {
         std::string result;
 
-        switch (side) {
+        switch (rotateSide(side, rotation)) {
         case Top:
             result = lines.front();
             break;
@@ -157,19 +157,20 @@ public:
         grid = std::vector(sideLength, std::vector(sideLength, -1));
     }
 
-    void solve() {
-        std::vector<int> remaining;
-        for (int i = 0; i < tiles.size(); i++) {
-            remaining.push_back(i);
+    bool solve() {
+        std::unordered_set<int> used;
+        return solve(used);
+    }
+
+    int get(int y, int x) {
+        if (y < 0 || y >= sideLength || x < 0 || x >= sideLength) {
+            return -1;
         }
-        solve(remaining);
+        return grid[y][x];
     }
 
     bool linesUp(int i, int nx, int ny, Side s1, Side s2) {
-        if (ny < 0 || ny >= sideLength || nx < 0 || nx >= sideLength) {
-            return true;
-        }
-        int j{grid[ny][nx]};
+        int j{get(ny, nx)};
         if (j < 0) {
             return true;
         }
@@ -177,31 +178,84 @@ public:
     }
 
     bool canPlace(int i, int x, int y) {
-        return linesUp(i, x - 1, y, Left, Right)
+        return (get(y - 1, x) + get(y + 1, x) + get(y, x - 1) + get(y, x + 1) > -4)
+            && linesUp(i, x - 1, y, Left, Right)
             && linesUp(i, x + 1, y, Right, Left)
             && linesUp(i, x, y - 1, Top, Bottom)
             && linesUp(i, x, y + 1, Bottom, Top);
     }
 
-    bool solve(std::vector<int>& remaining) {
-        std::cout << remaining.size() << " remaining" << std::endl;
-        if (remaining.empty()) {
-            return true;
+    Vec2 getMinCorner() {
+        Vec2 min;
+        for (int y = 0; y < sideLength; y++) {
+            for (int x = 0; x < sideLength; x++) {
+                if ((x < min.x || y < min.y) && grid[y][x] > 0) {
+                    min.x = x;
+                    min.y = y;
+                }
+            }
+        }
+        return min;
+    }
+
+    Vec2 getMaxCorner() {
+        Vec2 max;
+        for (int y = 0; y < sideLength; y++) {
+            for (int x = 0; x < sideLength; x++) {
+                if ((x > max.x || y > max.y) && grid[y][x] > 0) {
+                    max.x = x;
+                    max.y = y;
+                }
+            }
+        }
+        return max;
+    }
+
+    bool isRectangular() {
+        Vec2 min{getMinCorner()};
+        Vec2 max{getMaxCorner()};
+        for (int y = min.y; y <= max.y; y++) {
+            for (int x = min.x; x <= max.x; x++) {
+                if (grid[y][x] < 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    bool solve(std::unordered_set<int>& used, bool first = true) {
+        std::cout << "used " << used.size() << std::endl;
+        int count{static_cast<int>(tiles.size())};
+        if (used.size() >= count) {
+            return isRectangular();
         } else {
-            int i = remaining.back();
-            remaining.pop_back();
-            for (int y = 0; y < sideLength; y++) {
-                for (int x = 0; x < sideLength; x++) {
-                    if (canPlace(i, x, y)) {
-                        grid[y][x] = i;
-                        if (solve(remaining)) {
-                            return true;
+            for (int i = 0; i < count; i++) {
+                if (!used.contains(i)) {
+                    for (int y = 0; y < sideLength; y++) {
+                        for (int x = 0; x < sideLength; x++) {
+                            if (grid[y][x] < 0) {
+                                for (int rot = 0; rot < 4; rot++) {
+                                    for (bool flipped : {false, true}) {
+                                        tiles[i].rotation = rot;
+                                        tiles[i].flipped = flipped;
+
+                                        if (first || canPlace(i, x, y)) {
+                                            grid[y][x] = i;
+                                            used.insert(i);
+                                            if (solve(used, false)) {
+                                                return true;
+                                            }
+                                            used.erase(i);
+                                            grid[y][x] = -1;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        grid[y][x] = -1;
                     }
                 }
             }
-            remaining.push_back(i);
             return false;
         }
     }
@@ -242,37 +296,44 @@ int main() {
 
     std::cout << jigsaw.tiles.size() << " tiles parsed!" << std::endl;
 
-    jigsaw.solve();
+    bool solved{jigsaw.solve()};
+
+    std::cout << "Solved: " << solved << std::endl;
     
     // Find the corners
 
-    // Vec2 tl, tr, bl, br;
-    // int tlTile, trTile, blTile, brTile;
+    Vec2 tl, tr, bl, br;
+    int tlTile, trTile, blTile, brTile;
 
-    // for (const auto& [i, pos] : grid) {
-    //     if (pos.x < tl.x || pos.y < tl.y) {
-    //         tl = pos;
-    //         tlTile = i;
-    //     }
-    //     if (pos.x > tr.x || pos.y < tr.y) {
-    //         tr = pos;
-    //         trTile = i;
-    //     }
-    //     if (pos.x < bl.x || pos.y > bl.y) {
-    //         bl = pos;
-    //         blTile = i;
-    //     }
-    //     if (pos.x > br.x || pos.y > br.y) {
-    //         br = pos;
-    //         brTile = i;
-    //     }
+    for (int y = 0; y < jigsaw.sideLength; y++) {
+        for (int x = 0; x < jigsaw.sideLength; x++) {
+            Vec2 pos{x, y};
+            int i = jigsaw.grid[y][x];
 
-    //     std::cout << "at " << pos.x << ", " << pos.y << ": " << jigsaw.tiles[i].id << std::endl;
-    // }
+            if (i >= 0) {
+                if (pos.x < tl.x || pos.y < tl.y) {
+                    tl = pos;
+                    tlTile = i;
+                }
+                if (pos.x > tr.x || pos.y < tr.y) {
+                    tr = pos;
+                    trTile = i;
+                }
+                if (pos.x < bl.x || pos.y > bl.y) {
+                    bl = pos;
+                    blTile = i;
+                }
+                if (pos.x > br.x || pos.y > br.y) {
+                    br = pos;
+                    brTile = i;
+                }
+            }
+        }
+    }
 
-    // unsigned long long tlId = jigsaw.tiles[tlTile].id, trId = jigsaw.tiles[trTile].id, blId = jigsaw.tiles[blTile].id, brId = jigsaw.tiles[brTile].id;
-    // std::cout << "Corners: " << tlId << ", " << trId << ", " << blId << ", " << brId << std::endl;
-    // std::cout << "Part 1: " << (tlId * trId * blId * brId) << std::endl;
+    unsigned long long tlId = jigsaw.tiles[tlTile].id, trId = jigsaw.tiles[trTile].id, blId = jigsaw.tiles[blTile].id, brId = jigsaw.tiles[brTile].id;
+    std::cout << "Corners: " << tlId << ", " << trId << ", " << blId << ", " << brId << std::endl;
+    std::cout << "Part 1: " << (tlId * trId * blId * brId) << std::endl;
 
     return 0;
 }
