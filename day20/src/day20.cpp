@@ -154,6 +154,53 @@ public:
         return occurrences;
     }
 
+    std::vector<std::string> rows() const {
+        std::vector<std::string> result;
+        for (int i = 0; i < height(); i++) {
+            result.push_back(row(i));
+        }
+        return result;
+    }
+
+    std::optional<int> tryPlacingAndCountOther(const Tile& pat, char c) {
+        std::vector<std::string> prs{pat.rows()};
+        std::vector<std::string> rs{rows()};
+        int ph{pat.height()};
+        int pw{pat.width()};
+        int h{height() - ph};
+        int w{width() - pw};
+        bool placed{false};
+        int occs{count(c)};
+
+        for (int y = 0; y <= h; y++) {
+            for (int x = 0; x <= w; x++) {
+                for (int py = 0; py < ph; py++) {
+                    for (int px = 0; px < pw; px++) {
+                        if (prs[py][px] == c && rs[y + py][x + px] != prs[py][px]) {
+                            goto nextPos;
+                        }
+                    }
+                }
+
+                placed = true;
+                std::cout << "Found pattern at " << x << ", " << y << std::endl;
+
+                for (int py = 0; py < ph; py++) {
+                    for (int px = 0; px < pw; px++) {
+                        if (prs[py][px] == c) {
+                            rs[y + py][x + px] = 'O';
+                            occs--;
+                        }
+                    }
+                }
+
+                nextPos: {}
+            }
+        }
+
+        return placed ? std::optional(occs) : std::nullopt;
+    }
+
     const std::string str() const {
         std::string result;
 
@@ -360,6 +407,12 @@ std::vector<std::string> split(const std::string& s, const std::string& delim) {
     return result;
 }
 
+void trimTrailingEmpty(std::vector<std::string>& vec) {
+    while (!vec.empty() && vec.back().empty()) {
+        vec.pop_back();
+    }
+}
+
 Jigsaw parseJigsaw(const std::string& raw) {
     Jigsaw jigsaw;
 
@@ -381,7 +434,7 @@ std::string readFile(const char* path) {
 int main() {
     // Parse the input
 
-    std::string input{readFile("resources/example.txt")};
+    std::string input{readFile("resources/input.txt")};
     Jigsaw jigsaw{parseJigsaw(input)};
     std::cout << jigsaw.tiles.size() << " tiles parsed!" << std::endl;
 
@@ -405,20 +458,26 @@ int main() {
     // Parse the sea monster
 
     std::string rawMonster{readFile("resources/seaMonster.txt")};
-    Tile monster{0, split(rawMonster, "\n")};
+    std::vector<std::string> monsterLines = split(rawMonster, "\n");
+    trimTrailingEmpty(monsterLines);
+    Tile monster{0, monsterLines};
     
     // Search for sea monsterso
 
-    Tile map{0, split(jigsaw.fullMap(), "\n")};
+    std::vector<std::string> mapLines{split(jigsaw.fullMap(), "\n")};
+    trimTrailingEmpty(mapLines);
+
+    Tile map{0, mapLines};
 
     for (int rot = 0; rot < 4; rot++) {
         for (bool flip : {false, true}) {
             monster.rotation = rot;
             monster.flipped = flip;
 
-            if (map.tryPlacing(monster)) {
-                int count = map.count('#');
-                std::cout << "Part 2: " << count << std::endl;
+            std::optional<int> hashes{map.tryPlacingAndCountOther(monster, '#')};
+
+            if (hashes.has_value()) {
+                std::cout << "Part 2: " << *hashes << std::endl;
                 return 0;
             }
         }
