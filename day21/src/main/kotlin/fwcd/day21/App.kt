@@ -5,8 +5,8 @@ import java.io.File
 private val pattern = Regex("([\\w ]+)(?: \\(contains ([^\\)]+)\\))?")
 
 data class Food(
-    val ingredients: List<String>,
-    val allergens: List<String>
+    val ingredients: Set<String>,
+    val allergens: Set<String>
 )
 
 fun satisfies(food: Food, assignment: Map<String, String?>): Boolean =
@@ -58,18 +58,54 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
     }
 }
 
+fun simplify(foods: List<Food>): List<Food> {
+    var remaining = mutableListOf<Food>()
+    var singles = mutableMapOf<String, Set<String>>()
+    var simplified = false
+    
+    for (food in foods) {
+        if (food.allergens.size == 1) {
+            val allergen = food.allergens.first()
+            val ingreds = food.ingredients.toSet()
+            singles[allergen] = singles[allergen]?.also {
+                println("Reinserting $allergen into $singles")
+                simplified = true
+            }?.intersect(ingreds) ?: ingreds
+        } else {
+            remaining.add(food)
+        }
+    }
+    
+    val simplifiedFoods =
+        remaining.map { food ->
+            val removingAllergens = food.allergens.filter { singles.containsKey(it) }
+            Food(
+                food.ingredients.filterNot { ingred -> removingAllergens.any { ingred in singles[it]!! } }.toSet(),
+                food.allergens.minus(removingAllergens)
+            )
+        } + singles.map { Food(it.value, setOf(it.key)) }
+    return if (foods.toSet() != simplifiedFoods.toSet()) {
+        simplify(simplifiedFoods)
+    } else {
+        simplifiedFoods
+    }
+}
+
 fun main(args: Array<String>) {
     val input = File("resources/example.txt").readText()
     val foods = input.lines()
         .mapNotNull(pattern::matchEntire)
-        .map { Food(it.groupValues[1].split(" "), it.groupValues[2].split(",").map { it.trim() }) }
+        .map { Food(it.groupValues[1].split(" ").toSet(), it.groupValues[2].split(",").map { it.trim() }.toSet()) }
         .sortedBy { -it.allergens.size - it.ingredients.size }
     
     val ingreds = foods.flatMap { it.ingredients }.toSet()
     val allergens = foods.flatMap { it.allergens }.toSet()
     var assignment = mutableMapOf<String, String?>()
     
-    if (solveAllergens(ingreds.toList(), allergens.toMutableSet(), foods.toMutableList(), assignment)) {
+    var simplified = simplify(foods)
+    print("Simpler: $simplified")
+    
+    if (solveAllergens(ingreds.toList(), allergens.toMutableSet(), simplified.toMutableList(), assignment)) {
         val safeIngreds = ingreds.filterNot { assignment.containsKey(it) }
         println("Safe: $safeIngreds | $assignment >> ${foods.all { satisfies(it, assignment) }}")
         println("Part 1: ${safeIngreds.map { ingred -> foods.map { it.ingredients.count { it == ingred } }.sum() }.sum()}")
