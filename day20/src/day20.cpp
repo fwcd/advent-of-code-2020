@@ -21,6 +21,12 @@ struct Vec2 {
     Vec2 operator+(Vec2 rhs) {
         return Vec2(x + rhs.x, y + rhs.y);
     }
+
+    std::string str() {
+        std::stringstream ss;
+        ss << '(' << x << ", " << y << ')';
+        return ss.str();
+    }
 };
 
 enum Side {
@@ -114,7 +120,7 @@ public:
         flipped = !flipped;
     }
 
-    const std::string toString() const {
+    const std::string str() const {
         std::string result;
 
         for (const std::string& line : lines) {
@@ -129,10 +135,14 @@ public:
 // The jigsaw solver uses a union-find structure for efficiency
 
 class Jigsaw {
+private:
+    int puzzleSideLength;
 public:
     std::vector<std::vector<int>> grid;
     std::vector<Tile> tiles;
     int sideLength;
+    Vec2 minCorner;
+    Vec2 maxCorner;
 
     void addTile(const std::vector<std::string>& lines) {
         std::vector<std::string> linesMut{lines};
@@ -153,12 +163,17 @@ public:
     }
 
     void setUp() {
-        sideLength = 2 * (static_cast<int>(std::sqrt(tiles.size())) + 1);
+        puzzleSideLength = static_cast<int>(std::sqrt(tiles.size())) + 1;
+        sideLength = 2 * puzzleSideLength;
         grid = std::vector(sideLength, std::vector(sideLength, -1));
+        minCorner = Vec2(sideLength - 1, sideLength - 1);
     }
 
     bool solve() {
-        std::unordered_set<int> used;
+        int i{0};
+        grid[sideLength / 2][sideLength / 2] = i;
+        print();
+        std::unordered_set<int> used = {i};
         return solve(used);
     }
 
@@ -185,35 +200,9 @@ public:
             && linesUp(i, x, y + 1, Bottom, Top);
     }
 
-    Vec2 getMinCorner() {
-        Vec2 min;
-        for (int y = 0; y < sideLength; y++) {
-            for (int x = 0; x < sideLength; x++) {
-                if ((x < min.x || y < min.y) && grid[y][x] > 0) {
-                    min.x = x;
-                    min.y = y;
-                }
-            }
-        }
-        return min;
-    }
-
-    Vec2 getMaxCorner() {
-        Vec2 max;
-        for (int y = 0; y < sideLength; y++) {
-            for (int x = 0; x < sideLength; x++) {
-                if ((x > max.x || y > max.y) && grid[y][x] > 0) {
-                    max.x = x;
-                    max.y = y;
-                }
-            }
-        }
-        return max;
-    }
-
     bool isRectangular() {
-        Vec2 min{getMinCorner()};
-        Vec2 max{getMaxCorner()};
+        Vec2 min{minCorner};
+        Vec2 max{maxCorner};
         for (int y = min.y; y <= max.y; y++) {
             for (int x = min.x; x <= max.x; x++) {
                 if (grid[y][x] < 0) {
@@ -224,13 +213,32 @@ public:
         return true;
     }
 
+    void print() {
+        for (int y = 0; y < sideLength; y++) {
+            for (int x = 0; x < sideLength; x++) {
+                if (grid[y][x] < 0) {
+                    std::cout << '.';
+                } else {
+                    std::cout << tiles[grid[y][x]].id << ' ';
+                }
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     bool solve(std::unordered_set<int>& used, bool first = true) {
         std::cout << "used " << used.size() << std::endl;
         int count{static_cast<int>(tiles.size())};
+        if ((used.size() > 1) && (((maxCorner.x - minCorner.x) > puzzleSideLength) || ((maxCorner.y - minCorner.y) > puzzleSideLength))) {
+            std::cout << "Rejected at " << used.size() << " (sl: " << puzzleSideLength << ") max: " << maxCorner.str() << ", min: " << minCorner.str() << std::endl;
+            print();
+            return false;
+        }
         if (used.size() >= count) {
             return isRectangular();
         } else {
-            for (int i = 0; i < count; i++) {
+            for (int i = 1; i < count; i++) {
                 if (!used.contains(i)) {
                     for (int y = 0; y < sideLength; y++) {
                         for (int x = 0; x < sideLength; x++) {
@@ -240,7 +248,13 @@ public:
                                         tiles[i].rotation = rot;
                                         tiles[i].flipped = flipped;
 
-                                        if (first || canPlace(i, x, y)) {
+                                        if (canPlace(i, x, y)) {
+                                            Vec2 prevMax{maxCorner};
+                                            Vec2 prevMin{minCorner};
+                                            if (x > maxCorner.x) maxCorner.x = x;
+                                            if (x < minCorner.x) minCorner.x = x;
+                                            if (y > maxCorner.y) maxCorner.y = y;
+                                            if (y < minCorner.y) minCorner.y = y;
                                             grid[y][x] = i;
                                             used.insert(i);
                                             if (solve(used, false)) {
@@ -248,6 +262,8 @@ public:
                                             }
                                             used.erase(i);
                                             grid[y][x] = -1;
+                                            maxCorner = prevMax;
+                                            minCorner = prevMin;
                                         }
                                     }
                                 }
@@ -299,6 +315,7 @@ int main() {
     bool solved{jigsaw.solve()};
 
     std::cout << "Solved: " << solved << std::endl;
+    if (!solved) return -1;
     
     // Find the corners
 
