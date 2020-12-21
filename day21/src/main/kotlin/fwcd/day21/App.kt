@@ -9,26 +9,33 @@ data class Food(
     val allergens: List<String>
 )
 
+fun mightSatisfy(foods: List<Food>, assignment: Map<String, String?>): Boolean =
+    foods.all { food -> food.ingredients.any { !assignment.containsKey(it) }
+        || food.allergens.any { !assignment.containsValue(it) }
+        || food.allergens.any { allergen -> food.ingredients.any { assignment[it] == allergen } } }
+
 fun satisfies(foods: List<Food>, assignment: Map<String, String?>): Boolean =
-    foods.all { food -> food.allergens.all { allergen -> food.ingredients.any { assignment[it] == allergen } } }
+    foods.all { food -> food.allergens
+        .all { allergen -> food.ingredients.any { assignment[it] == allergen } } }           
 
 fun solveAllergens(ingreds: List<String>, allergens: List<String>, foods: List<Food>, assignment: MutableMap<String, String?>): Boolean {
     if (ingreds.isEmpty()) {
         return satisfies(foods, assignment)
     } else {
         val ingred = ingreds.last()
-        for (allergen in listOf(null) + allergens.filterNot { assignment.values.contains(it) }) {
+        for (allergen in listOf(null) + allergens) {
             assignment[ingred] = allergen
-            if (solveAllergens(ingreds.dropLast(1), allergens, foods, assignment)) {
+            if (mightSatisfy(foods, assignment) && solveAllergens(ingreds.dropLast(1), allergens.filterNot { it == allergen }, foods, assignment)) {
                 return true
             }
+            assignment.remove(ingred)
         }
         return false
     }
 }
 
 fun main(args: Array<String>) {
-    val input = File("resources/example.txt").readText()
+    val input = File("resources/input.txt").readText()
     val foods = input.lines()
         .mapNotNull(pattern::matchEntire)
         .map { Food(it.groupValues[1].split(" "), it.groupValues[2].split(",").map { it.trim() }) }
