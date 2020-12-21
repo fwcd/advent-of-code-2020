@@ -64,9 +64,7 @@ fun simplify(foods: List<Food>): List<Food> {
     for (food in foods) {
         for (allergen in food.allergens) {
             val ingreds = food.ingredients.toSet()
-            singles[allergen] = singles[allergen]?.also {
-                // println("Reinserting $allergen into $singles")
-            }?.intersect(ingreds) ?: ingreds
+            singles[allergen] = singles[allergen]?.intersect(ingreds) ?: ingreds
         }
     }
     
@@ -91,11 +89,11 @@ fun main(args: Array<String>) {
     var assignment = mutableMapOf<String, String?>()
     
     var simplified = simplify(foods)
-    println("Simpler: $simplified")
+    println("Simplified rules: $simplified")
     
     if (solveAllergens(ingreds.toList(), allergens.toMutableSet(), simplified.toMutableList(), assignment)) {
         val safeIngreds = ingreds.filterNot { assignment.containsKey(it) }
-        println("Safe: $safeIngreds | $assignment >> ${foods.all { satisfies(it, assignment) }}")
+        // println("Safe: $safeIngreds | $assignment >> ${foods.all { satisfies(it, assignment) }}")
         println("Part 1: ${safeIngreds.map { ingred -> foods.map { it.ingredients.count { it == ingred } }.sum() }.sum()}")
         println("Part 2: ${assignment.toList().sortedBy { it.second }.map { it.first }.joinToString(",")}")
     }
