@@ -23,7 +23,6 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
         return allergens.isEmpty()
     } else {
         val food = foods.popLast()
-        println("Chose $food")
 
         for (allergen in food.allergens) {
             var found = false
@@ -34,12 +33,9 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
                     if (!assignment.containsKey(ingred)) {
                         allergens.remove(allergen)
                         assignment[ingred] = allergen
-                        println("$ingred -> $allergen ")
                         if (solveAllergens(ingreds, allergens, foods, assignment)) {
                             found = true
                             break
-                        } else {
-                            println("  $ingred -> $allergen: no!")
                         }
                         assignment.remove(ingred)
                         allergens.add(allergen)
@@ -47,7 +43,6 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
                 }
             } else {
                 found = food.ingredients.any { assignment[it] == allergen }
-                println("Found $allergen in $food")
             }
 
             if (!found) {
@@ -56,7 +51,6 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
         }
         
         if (solveAllergens(ingreds, allergens, foods, assignment)) {
-            println("$assignment is safe (remaining: $allergens, $foods)!")
             return true
         }
         foods.add(food)
@@ -65,13 +59,11 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
 }
 
 fun main(args: Array<String>) {
-    val input = File("resources/example.txt").readText()
+    val input = File("resources/input.txt").readText()
     val foods = input.lines()
         .mapNotNull(pattern::matchEntire)
         .map { Food(it.groupValues[1].split(" "), it.groupValues[2].split(",").map { it.trim() }) }
         .sortedBy { -it.allergens.size - it.ingredients.size }
-    
-    println(foods)
     
     val ingreds = foods.flatMap { it.ingredients }.toSet()
     val allergens = foods.flatMap { it.allergens }.toSet()
