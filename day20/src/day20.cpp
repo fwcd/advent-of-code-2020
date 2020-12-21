@@ -71,9 +71,8 @@ std::string sideToString(Side s) {
 }
 
 class Tile {
-private:
-    std::vector<std::string> lines;
 public:
+    std::vector<std::string> lines;
     unsigned long long id;
     int parent;
     bool flipped;
@@ -86,45 +85,68 @@ public:
         flipped(false),
         rotation(0),
         neighbors({{Top, std::nullopt}, {Left, std::nullopt}, {Bottom, std::nullopt}, {Right, std::nullopt}}) {}
+    
+    std::string rawRow(int i) const {
+        return lines[i];
+    }
 
-    std::string getEdge(Side side) {
+    std::string rawColumn(int i) const {
         std::string result;
-
-        switch (rotateSide(side, rotation)) {
-        case Top:
-            result = lines.front();
-            break;
-        case Bottom:
-            result = lines.back();
-            break;
-        case Left:
-            for (int y = 0; y < lines.size(); y++) {
-                result.push_back(lines[y].front());
-            }
-            break;
-        case Right:
-            for (int y = 0; y < lines.size(); y++) {
-                result.push_back(lines[y].back());
-            }
-            break;
+        for (int y = 0; y < lines.size(); y++) {
+            result.push_back(lines[y][i]);
         }
-
-        if (flipped) {
-            std::reverse(result.begin(), result.end());
-        }
-
         return result;
     }
 
-    void flip() {
-        flipped = !flipped;
+    std::string row(int i) const {
+        std::string result;
+        bool dir = rotation == Top || rotation == Right;
+        bool flip = flipped ^ (rotation == Right || rotation == Bottom);
+        if (rotation % 2 == 0) {
+            result = rawRow(dir ? i : (lines.size() - 1) - i);
+        } else {
+            result = rawColumn(dir ? i : (lines[0].size() - 1) - i);
+        }
+        if (flip) {
+            std::reverse(result.begin(), result.end());
+        }
+        return result;
+    }
+
+    std::string column(int i) const {
+        std::string result;
+        for (int y = 0; y < height(); y++) {
+            result.push_back(row(y)[i]);
+        }
+        return result;
+    }
+
+    std::string getEdge(Side side) {
+        switch (side) {
+        case Top:
+            return row(0);
+        case Bottom:
+            return row(height() - 1);
+        case Left:
+            return column(0);
+        case Right:
+            return column(width() - 1);
+        }
+    }
+
+    int width() const {
+        return rotation % 2 == 0 ? lines[0].size() : lines.size();
+    }
+
+    int height() const {
+        return rotation % 2 == 0 ? lines.size() : lines[0].size();
     }
 
     const std::string str() const {
         std::string result;
 
-        for (const std::string& line : lines) {
-            result += line;
+        for (int i = 0; i < height(); i++) {
+            result += row(i);
             result.push_back('\n');
         }
 
@@ -171,7 +193,10 @@ public:
 
     bool solve() {
         int i{0};
-        grid[sideLength / 2][sideLength / 2] = i;
+        int x{sideLength / 2};
+        grid[x][x] = i;
+        minCorner = Vec2(x, x);
+        maxCorner = Vec2(x, x);
         printGrid();
         std::unordered_set<int> used = {i};
         return solve(used);
@@ -227,6 +252,24 @@ public:
         std::cout << std::endl;
     }
 
+    void printVerbose() {
+        if (!isRectangular()) throw std::runtime_error("Can only print rectangular grids verbosely!");
+        int tileWidth = tiles[0].lines[0].size();
+        int tileHeight = tiles[0].lines.size();
+        for (int y = minCorner.y; y <= maxCorner.y; y++) {
+            for (int ty = 0; ty < tileHeight; ty++) {
+                for (int x = minCorner.x; x <= maxCorner.x; x++) {
+                    for (int tx = 0; tx < tileWidth; tx++) {
+                        std::cout << tiles[grid[y][x]].lines[ty][tx];
+                    }
+                    std::cout << ' ';
+                }
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    }
+
     bool solve(std::unordered_set<int>& used, bool first = true) {
         int count{static_cast<int>(tiles.size())};
         // if ((used.size() > 1) && (((maxCorner.x - minCorner.x) > puzzleSideLength) || ((maxCorner.y - minCorner.y) > puzzleSideLength))) {
@@ -247,9 +290,26 @@ public:
                                         tiles[i].rotation = rot;
                                         tiles[i].flipped = flipped;
 
-                                        grid[y][x] = i;
-                                        printGrid();
+                                        // DEBUG
+                                        if (used.size() == count - 1) {
+                                            grid[y][x] = i;
+                                            Vec2 prevMax{maxCorner};
+                                            Vec2 prevMin{minCorner};
+                                            if (x > maxCorner.x) maxCorner.x = x;
+                                            if (x < minCorner.x) minCorner.x = x;
+                                            if (y > maxCorner.y) maxCorner.y = y;
+                                            if (y < minCorner.y) minCorner.y = y;
+                                            if (isRectangular()) {
+                                                printGrid();
+                                                printVerbose();
+                                            }
+                                            grid[y][x] = -1;
+                                            maxCorner = prevMax;
+                                            minCorner = prevMin;
+                                        }
+
                                         if (canPlace(i, x, y)) {
+                                            grid[y][x] = i;
                                             Vec2 prevMax{maxCorner};
                                             Vec2 prevMin{minCorner};
                                             if (x > maxCorner.x) maxCorner.x = x;
@@ -261,10 +321,10 @@ public:
                                                 return true;
                                             }
                                             used.erase(i);
+                                            grid[y][x] = -1;
                                             maxCorner = prevMax;
                                             minCorner = prevMin;
                                         }
-                                        grid[y][x] = -1;
                                     }
                                 }
                             }
