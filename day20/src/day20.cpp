@@ -294,24 +294,6 @@ public:
                                         tiles[i].rotation = rot;
                                         tiles[i].flipped = flipped;
 
-                                        // DEBUG
-                                        if (used.size() == count - 1) {
-                                            grid[y][x] = i;
-                                            Vec2 prevMax{maxCorner};
-                                            Vec2 prevMin{minCorner};
-                                            if (x > maxCorner.x) maxCorner.x = x;
-                                            if (x < minCorner.x) minCorner.x = x;
-                                            if (y > maxCorner.y) maxCorner.y = y;
-                                            if (y < minCorner.y) minCorner.y = y;
-                                            if (isRectangular()) {
-                                                printGrid();
-                                                printVerbose();
-                                            }
-                                            grid[y][x] = -1;
-                                            maxCorner = prevMax;
-                                            minCorner = prevMin;
-                                        }
-
                                         if (canPlace(i, x, y)) {
                                             grid[y][x] = i;
                                             Vec2 prevMax{maxCorner};
@@ -367,7 +349,7 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    std::ifstream file{"resources/example.txt"};
+    std::ifstream file{"resources/input.txt"};
     std::stringstream ss;
     ss << file.rdbuf();
 
