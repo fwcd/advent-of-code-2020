@@ -228,12 +228,11 @@ public:
     }
 
     bool solve(std::unordered_set<int>& used, bool first = true) {
-        std::cout << "used " << used.size() << std::endl;
         int count{static_cast<int>(tiles.size())};
-        if ((used.size() > 1) && (((maxCorner.x - minCorner.x) > puzzleSideLength) || ((maxCorner.y - minCorner.y) > puzzleSideLength))) {
-            std::cout << "Rejected at " << used.size() << " (sl: " << puzzleSideLength << ") max: " << maxCorner.str() << ", min: " << minCorner.str() << std::endl;
-            return false;
-        }
+        // if ((used.size() > 1) && (((maxCorner.x - minCorner.x) > puzzleSideLength) || ((maxCorner.y - minCorner.y) > puzzleSideLength))) {
+        //     std::cout << "Rejected at " << used.size() << " (sl: " << puzzleSideLength << ") max: " << maxCorner.str() << ", min: " << minCorner.str() << std::endl;
+        //     return false;
+        // }
         if (used.size() >= count) {
             printGrid();
             return isRectangular();
@@ -248,6 +247,8 @@ public:
                                         tiles[i].rotation = rot;
                                         tiles[i].flipped = flipped;
 
+                                        grid[y][x] = i;
+                                        printGrid();
                                         if (canPlace(i, x, y)) {
                                             Vec2 prevMax{maxCorner};
                                             Vec2 prevMin{minCorner};
@@ -255,16 +256,15 @@ public:
                                             if (x < minCorner.x) minCorner.x = x;
                                             if (y > maxCorner.y) maxCorner.y = y;
                                             if (y < minCorner.y) minCorner.y = y;
-                                            grid[y][x] = i;
                                             used.insert(i);
                                             if (solve(used, false)) {
                                                 return true;
                                             }
                                             used.erase(i);
-                                            grid[y][x] = -1;
                                             maxCorner = prevMax;
                                             minCorner = prevMin;
                                         }
+                                        grid[y][x] = -1;
                                     }
                                 }
                             }
@@ -303,7 +303,7 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    std::ifstream file{"resources/example.txt"};
+    std::ifstream file{"resources/example2.txt"};
     std::stringstream ss;
     ss << file.rdbuf();
 
