@@ -191,6 +191,10 @@ public:
         minCorner = Vec2(sideLength - 1, sideLength - 1);
     }
 
+    Tile& tileAt(Vec2 pos) {
+        return tiles[grid[pos.y][pos.x]];
+    }
+
     bool solve() {
         int i{0};
         int x{sideLength / 2};
@@ -363,7 +367,7 @@ Jigsaw parseJigsaw(const std::string& raw) {
 }
 
 int main() {
-    std::ifstream file{"resources/example2.txt"};
+    std::ifstream file{"resources/example.txt"};
     std::stringstream ss;
     ss << file.rdbuf();
 
@@ -379,36 +383,12 @@ int main() {
     
     // Find the corners
 
-    Vec2 tl, tr, bl, br;
-    int tlTile, trTile, blTile, brTile;
+    Vec2 tl{jigsaw.minCorner};
+    Vec2 br{jigsaw.maxCorner};
+    Vec2 tr{br.x, tl.y};
+    Vec2 bl{tl.x, br.y};
 
-    for (int y = 0; y < jigsaw.sideLength; y++) {
-        for (int x = 0; x < jigsaw.sideLength; x++) {
-            Vec2 pos{x, y};
-            int i = jigsaw.grid[y][x];
-
-            if (i >= 0) {
-                if (pos.x < tl.x || pos.y < tl.y) {
-                    tl = pos;
-                    tlTile = i;
-                }
-                if (pos.x > tr.x || pos.y < tr.y) {
-                    tr = pos;
-                    trTile = i;
-                }
-                if (pos.x < bl.x || pos.y > bl.y) {
-                    bl = pos;
-                    blTile = i;
-                }
-                if (pos.x > br.x || pos.y > br.y) {
-                    br = pos;
-                    brTile = i;
-                }
-            }
-        }
-    }
-
-    unsigned long long tlId = jigsaw.tiles[tlTile].id, trId = jigsaw.tiles[trTile].id, blId = jigsaw.tiles[blTile].id, brId = jigsaw.tiles[brTile].id;
+    unsigned long long tlId = jigsaw.tileAt(tl).id, trId = jigsaw.tileAt(tr).id, blId = jigsaw.tileAt(bl).id, brId = jigsaw.tileAt(br).id;
     std::cout << "Corners: " << tlId << ", " << trId << ", " << blId << ", " << brId << std::endl;
     std::cout << "Part 1: " << (tlId * trId * blId * brId) << std::endl;
 
