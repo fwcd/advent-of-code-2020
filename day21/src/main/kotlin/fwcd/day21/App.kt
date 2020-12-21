@@ -59,31 +59,19 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
 }
 
 fun simplify(foods: List<Food>): List<Food> {
-    var remaining = mutableListOf<Food>()
     var singles = mutableMapOf<String, Set<String>>()
-    var simplified = false
     
     for (food in foods) {
-        if (food.allergens.size == 1) {
-            val allergen = food.allergens.first()
+        for (allergen in food.allergens) {
             val ingreds = food.ingredients.toSet()
             singles[allergen] = singles[allergen]?.also {
-                println("Reinserting $allergen into $singles")
-                simplified = true
+                // println("Reinserting $allergen into $singles")
             }?.intersect(ingreds) ?: ingreds
-        } else {
-            remaining.add(food)
         }
     }
     
     val simplifiedFoods =
-        remaining.map { food ->
-            val removingAllergens = food.allergens.filter { singles.containsKey(it) }
-            Food(
-                food.ingredients.filterNot { ingred -> removingAllergens.any { ingred in singles[it]!! } }.toSet(),
-                food.allergens.minus(removingAllergens)
-            )
-        } + singles.map { Food(it.value, setOf(it.key)) }
+        singles.map { Food(it.value, setOf(it.key)) }
     return if (foods.toSet() != simplifiedFoods.toSet()) {
         simplify(simplifiedFoods)
     } else {
@@ -92,7 +80,7 @@ fun simplify(foods: List<Food>): List<Food> {
 }
 
 fun main(args: Array<String>) {
-    val input = File("resources/example.txt").readText()
+    val input = File("resources/input.txt").readText()
     val foods = input.lines()
         .mapNotNull(pattern::matchEntire)
         .map { Food(it.groupValues[1].split(" ").toSet(), it.groupValues[2].split(",").map { it.trim() }.toSet()) }
@@ -103,11 +91,12 @@ fun main(args: Array<String>) {
     var assignment = mutableMapOf<String, String?>()
     
     var simplified = simplify(foods)
-    print("Simpler: $simplified")
+    println("Simpler: $simplified")
     
     if (solveAllergens(ingreds.toList(), allergens.toMutableSet(), simplified.toMutableList(), assignment)) {
         val safeIngreds = ingreds.filterNot { assignment.containsKey(it) }
         println("Safe: $safeIngreds | $assignment >> ${foods.all { satisfies(it, assignment) }}")
         println("Part 1: ${safeIngreds.map { ingred -> foods.map { it.ingredients.count { it == ingred } }.sum() }.sum()}")
+        println("Part 2: ${assignment.toList().sortedBy { it.second }.map { it.first }.joinToString(",")}")
     }
 }
