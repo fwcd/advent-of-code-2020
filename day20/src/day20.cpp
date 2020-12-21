@@ -23,9 +23,9 @@ struct Vec2 {
     }
 
     std::string str() {
-        std::stringstream ss;
-        ss << '(' << x << ", " << y << ')';
-        return ss.str();
+        std::stringstream sts;
+        sts << '(' << x << ", " << y << ')';
+        return sts.str();
     }
 };
 
@@ -74,14 +74,13 @@ class Tile {
 public:
     std::vector<std::string> lines;
     unsigned long long id;
-    int parent;
     bool flipped;
     int rotation;
     std::unordered_map<Side, std::optional<int>> neighbors;
 
     Tile(unsigned long long id, const std::vector<std::string>& lines) :
-        id(id),
         lines(lines),
+        id(id),
         flipped(false),
         rotation(0),
         neighbors({{Top, std::nullopt}, {Left, std::nullopt}, {Bottom, std::nullopt}, {Right, std::nullopt}}) {}
@@ -154,7 +153,7 @@ public:
     }
 };
 
-// The jigsaw solver uses a union-find structure for efficiency
+// The jigsaw solver uses backtracking
 
 class Jigsaw {
 private:
@@ -242,44 +241,8 @@ public:
         return true;
     }
 
-    void printGrid() {
-        for (int y = 0; y < sideLength; y++) {
-            for (int x = 0; x < sideLength; x++) {
-                if (grid[y][x] < 0) {
-                    std::cout << ".... ";
-                } else {
-                    std::cout << tiles[grid[y][x]].id << ' ';
-                }
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
-    void printVerbose() {
-        if (!isRectangular()) throw std::runtime_error("Can only print rectangular grids verbosely!");
-        int tileWidth = tiles[0].lines[0].size();
-        int tileHeight = tiles[0].lines.size();
-        for (int y = minCorner.y; y <= maxCorner.y; y++) {
-            for (int ty = 0; ty < tileHeight; ty++) {
-                for (int x = minCorner.x; x <= maxCorner.x; x++) {
-                    for (int tx = 0; tx < tileWidth; tx++) {
-                        std::cout << tiles[grid[y][x]].lines[ty][tx];
-                    }
-                    std::cout << ' ';
-                }
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-        }
-    }
-
     bool solve(std::unordered_set<int>& used, bool first = true) {
         int count{static_cast<int>(tiles.size())};
-        // if ((used.size() > 1) && (((maxCorner.x - minCorner.x) > puzzleSideLength) || ((maxCorner.y - minCorner.y) > puzzleSideLength))) {
-        //     std::cout << "Rejected at " << used.size() << " (sl: " << puzzleSideLength << ") max: " << maxCorner.str() << ", min: " << minCorner.str() << std::endl;
-        //     return false;
-        // }
         if (used.size() >= count) {
             printGrid();
             return isRectangular();
@@ -290,9 +253,9 @@ public:
                         for (int x = 0; x < sideLength; x++) {
                             if (grid[y][x] < 0) {
                                 for (int rot = 0; rot < 4; rot++) {
-                                    for (bool flipped : {false, true}) {
+                                    for (bool flip : {false, true}) {
                                         tiles[i].rotation = rot;
-                                        tiles[i].flipped = flipped;
+                                        tiles[i].flipped = flip;
 
                                         if (canPlace(i, x, y)) {
                                             grid[y][x] = i;
@@ -320,6 +283,53 @@ public:
             }
             return false;
         }
+    }
+
+    void printGrid() {
+        for (int y = 0; y < sideLength; y++) {
+            for (int x = 0; x < sideLength; x++) {
+                if (grid[y][x] < 0) {
+                    std::cout << ".... ";
+                } else {
+                    std::cout << tiles[grid[y][x]].id << ' ';
+                }
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    void printVerbose() {
+        std::cout << fullMap(true, true);
+    }
+
+    std::string fullMap(bool withSpaces = false, bool withBorder = false) {
+        if (!isRectangular()) throw std::runtime_error("Can only print rectangular grids verbosely!");
+        std::stringstream sts;
+
+        int tileWidth = tiles[0].width();
+        int tileHeight = tiles[0].height();
+
+        int pad = withBorder ? 0 : 1;
+
+        for (int y = minCorner.y; y <= maxCorner.y; y++) {
+            for (int ty = pad; ty < tileHeight - pad; ty++) {
+                for (int x = minCorner.x; x <= maxCorner.x; x++) {
+                    for (int tx = pad; tx < tileWidth - pad; tx++) {
+                        sts << tiles[grid[y][x]].lines[ty][tx];
+                    }
+                    if (withSpaces) {
+                        sts << ' ';
+                    }
+                }
+                sts << std::endl;
+            }
+            if (withSpaces) {
+                sts << std::endl;
+            }
+        }
+
+        return sts.str();
     }
 };
 
@@ -350,15 +360,15 @@ Jigsaw parseJigsaw(const std::string& raw) {
 
 std::string readFile(const char* path) {
     std::ifstream file{path};
-    std::stringstream ss;
-    ss << file.rdbuf();
-    return ss.str();
+    std::stringstream sts;
+    sts << file.rdbuf();
+    return sts.str();
 }
 
 int main() {
     // Parse the input
 
-    std::string input{readFile("resources/input.txt")};
+    std::string input{readFile("resources/example.txt")};
     Jigsaw jigsaw{parseJigsaw(input)};
     std::cout << jigsaw.tiles.size() << " tiles parsed!" << std::endl;
 
@@ -383,6 +393,18 @@ int main() {
 
     std::string rawMonster{readFile("resources/seaMonster.txt")};
     Tile monster{0, split(rawMonster, "\n")};
+    
+    // Search for sea monsterso
+
+    Tile map{0, split(jigsaw.fullMap(), "\n")};
+
+    for (int rot = 0; rot < 4; rot++) {
+        for (bool flip : {false, true}) {
+            monster.rotation = rot;
+            monster.flipped = flip;
+
+        }
+    }
 
     return 0;
 }
