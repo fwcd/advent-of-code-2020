@@ -50,12 +50,16 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
             }
         }
         
-        return true
+        if (solveAllergens(ingreds, allergens, foods, assignment)) {
+            return true
+        }
+        foods.remove(food)
+        return false
     }
 }
 
 fun main(args: Array<String>) {
-    val input = File("resources/input.txt").readText()
+    val input = File("resources/example.txt").readText()
     val foods = input.lines()
         .mapNotNull(pattern::matchEntire)
         .map { Food(it.groupValues[1].split(" "), it.groupValues[2].split(",").map { it.trim() }) }
