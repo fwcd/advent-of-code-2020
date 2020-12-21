@@ -18,6 +18,8 @@ fun <T> MutableList<T>.popLast(): T {
     return last
 }
 
+// Use backtracking to find a valid configuration
+
 fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: MutableList<Food>, assignment: MutableMap<String, String?>): Boolean {
     if (foods.isEmpty()) {
         return allergens.isEmpty()
