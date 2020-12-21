@@ -34,8 +34,7 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
                         allergens.remove(allergen)
                         assignment[ingred] = allergen
                         if (solveAllergens(ingreds, allergens, foods, assignment)) {
-                            found = true
-                            break
+                            return true
                         }
                         assignment.remove(ingred)
                         allergens.add(allergen)
@@ -46,15 +45,12 @@ fun solveAllergens(ingreds: List<String>, allergens: MutableSet<String>, foods: 
             }
 
             if (!found) {
+                foods.add(food)
                 return false
             }
         }
         
-        if (solveAllergens(ingreds, allergens, foods, assignment)) {
-            return true
-        }
-        foods.add(food)
-        return false
+        return true
     }
 }
 
@@ -71,7 +67,7 @@ fun main(args: Array<String>) {
     
     if (solveAllergens(ingreds.toList(), allergens.toMutableSet(), foods.toMutableList(), assignment)) {
         val safeIngreds = ingreds.filterNot { assignment.containsKey(it) }
-        println("Safe: $safeIngreds | $assignment")
+        println("Safe: $safeIngreds | $assignment >> ${foods.all { satisfies(it, assignment) }}")
         println("Part 1: ${safeIngreds.map { ingred -> foods.map { it.ingredients.count { it == ingred } }.sum() }.sum()}")
     }
 }
