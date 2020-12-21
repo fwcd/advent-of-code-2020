@@ -22,7 +22,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 18: Elixir
 - [x] Day 19: Haskell
 - [x] Day 20: C++
-- [ ] Day 21: ?
+- [x] Day 21: Kotlin
 - [ ] Day 22: ?
 - [ ] Day 23: ?
 - [ ] Day 24: ?
