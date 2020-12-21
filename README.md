@@ -21,7 +21,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 17: Swift
 - [x] Day 18: Elixir
 - [x] Day 19: Haskell
-- [ ] Day 20: C++
+- [x] Day 20: C++
 - [ ] Day 21: ?
 - [ ] Day 22: ?
 - [ ] Day 23: ?
