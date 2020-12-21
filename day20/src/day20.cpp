@@ -172,7 +172,7 @@ public:
     bool solve() {
         int i{0};
         grid[sideLength / 2][sideLength / 2] = i;
-        print();
+        printGrid();
         std::unordered_set<int> used = {i};
         return solve(used);
     }
@@ -213,11 +213,11 @@ public:
         return true;
     }
 
-    void print() {
+    void printGrid() {
         for (int y = 0; y < sideLength; y++) {
             for (int x = 0; x < sideLength; x++) {
                 if (grid[y][x] < 0) {
-                    std::cout << '.';
+                    std::cout << ".... ";
                 } else {
                     std::cout << tiles[grid[y][x]].id << ' ';
                 }
@@ -232,10 +232,10 @@ public:
         int count{static_cast<int>(tiles.size())};
         if ((used.size() > 1) && (((maxCorner.x - minCorner.x) > puzzleSideLength) || ((maxCorner.y - minCorner.y) > puzzleSideLength))) {
             std::cout << "Rejected at " << used.size() << " (sl: " << puzzleSideLength << ") max: " << maxCorner.str() << ", min: " << minCorner.str() << std::endl;
-            print();
             return false;
         }
         if (used.size() >= count) {
+            printGrid();
             return isRectangular();
         } else {
             for (int i = 1; i < count; i++) {
