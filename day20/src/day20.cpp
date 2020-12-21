@@ -348,18 +348,23 @@ Jigsaw parseJigsaw(const std::string& raw) {
     return jigsaw;
 }
 
-int main() {
-    std::ifstream file{"resources/input.txt"};
+std::string readFile(const char* path) {
+    std::ifstream file{path};
     std::stringstream ss;
     ss << file.rdbuf();
+    return ss.str();
+}
 
-    std::string input{ss.str()};
+int main() {
+    // Parse the input
+
+    std::string input{readFile("resources/input.txt")};
     Jigsaw jigsaw{parseJigsaw(input)};
-
     std::cout << jigsaw.tiles.size() << " tiles parsed!" << std::endl;
 
-    bool solved{jigsaw.solve()};
+    // Solve the puzzle
 
+    bool solved{jigsaw.solve()};
     std::cout << "Solved: " << solved << std::endl;
     if (!solved) return -1;
     
@@ -373,6 +378,11 @@ int main() {
     unsigned long long tlId = jigsaw.tileAt(tl).id, trId = jigsaw.tileAt(tr).id, blId = jigsaw.tileAt(bl).id, brId = jigsaw.tileAt(br).id;
     std::cout << "Corners: " << tlId << ", " << trId << ", " << blId << ", " << brId << std::endl;
     std::cout << "Part 1: " << (tlId * trId * blId * brId) << std::endl;
+
+    // Parse the sea monster
+
+    std::string rawMonster{readFile("resources/seaMonster.txt")};
+    Tile monster{0, split(rawMonster, "\n")};
 
     return 0;
 }
