@@ -51,3 +51,12 @@ line([C|Cs]) --> [C], line(Cs).
 
 eos([], []).
 
+% Main program
+
+parse_input(Ds) :-
+    phrase_from_file(decks(Ds), 'resources/input.txt').
+
+part1 :-
+    parse_input([Cs, Ds]),
+    game_score(Cs, Ds, Score),
+    print(['Part 1', Score]), nl.
