@@ -38,11 +38,8 @@ recursive_combat_round([C|Cs], [D|Ds], _, _, Gs, Hs) :-
     CL >= C, DL >= D, !,
     take(C, Cs, Es),
     take(D, Ds, Fs),
-    print('Recursing'), nl,
     recursive_combat_game(Es, Fs, [], [], _, W),
-    print(['Winner: ', W]), nl,
-    update_decks([C|Cs], [D|Ds], W, Gs, Hs),
-    print('Updated'), nl.
+    update_decks([C|Cs], [D|Ds], W, Gs, Hs).
 recursive_combat_round([C|Cs], [D|Ds], _, _, Es, Ds) :-
     C >= D, !,
     append(Cs, [C, D], Es).
@@ -53,7 +50,6 @@ recursive_combat_round([C|Cs], [D|Ds], _, _, Cs, Es) :-
 recursive_combat_game([], Ds, _, _, Ds, 1) :- !.
 recursive_combat_game(Cs, [], _, _, Cs, 0) :- !.
 recursive_combat_game([C|Cs], [D|Ds], Ps1, Ps2, Ws, W) :-
-    print([[C|Cs], [D|Ds]]), nl,
     recursive_combat_round([C|Cs], [D|Ds], Ps1, Ps2, Es, Fs),
     recursive_combat_game(Es, Fs, [[C|Cs]|Ps1], [[D|Ds]|Ps2], Ws, W).
 
@@ -89,7 +85,7 @@ eos([], []).
 % Main program
 
 parse_input(Ds) :-
-    phrase_from_file(decks(Ds), 'resources/example.txt').
+    phrase_from_file(decks(Ds), 'resources/input.txt').
 
 main :-
     parse_input([Cs, Ds]),
