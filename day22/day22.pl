@@ -1,24 +1,65 @@
 :- use_module(library(pio)).
 
-append([], Xs, Xs).
-append([E|Es], Xs, [E|Fs]) :- append(Es, Xs, Fs).
+take(N, _, Xs) :-
+    N =< 0, !, N =:= 0,
+    Xs = [].
+take(_, [], []).
+take(N, [X|Xs], [X|Ys]) :-
+    M is N - 1,
+    take(M, Xs, Ys).
 
-% Simulates a round of the game with Cs being player 1's deck
-% and Ds being player 2's deck
-round([C|Cs], [D|Ds], Es, Ds) :-
+sort_desc(Xs, Zs) :-
+    sort(Xs, Ys),
+    reverse(Ys, Zs).
+
+% The Game of Combat (pt. 1)
+
+combat_round([C|Cs], [D|Ds], Es, Ds) :-
     C > D, !,
     append(Cs, [C, D], Es).
-round([C|Cs], [D|Ds], Cs, Es) :-
+combat_round([C|Cs], [D|Ds], Cs, Es) :-
     C =< D, !,
     append(Ds, [D, C], Es).
 
-% Simulates the game until one of the decks is empty.
-game([], Ds, Ds) :- !.
-game(Cs, [], Cs) :- !.
-game([C|Cs], [D|Ds], Ws) :-
-    round([C|Cs], [D|Ds], Es, Fs),
-    % print([Es, Fs]), nl,
-    game(Es, Fs, Ws).
+combat_game([], Ds, Ds) :- !.
+combat_game(Cs, [], Cs) :- !.
+combat_game([C|Cs], [D|Ds], Ws) :-
+    combat_round([C|Cs], [D|Ds], Es, Fs),
+    combat_game(Es, Fs, Ws).
+
+% The Game of Recursive Combat (pt. 2)
+
+update_decks([C|Cs], [D|Ds], 0, Es, Ds) :-
+    sort_desc([C, D], Zs),
+    append(Cs, Zs, Es).
+update_decks([C|Cs], [D|Ds], 1, Cs, Es) :-
+    sort_desc([C, D], Zs),
+    append(Ds, Zs, Es).
+
+recursive_combat_round(Cs, Ds, Ps1, Ps2, Cs, []) :-
+    (member(Cs, Ps1); member(Ds, Ps2)), !.
+recursive_combat_round([C|Cs], [D|Ds], _, _, Es, Fs) :-
+    length(Cs, CL),
+    length(Ds, DL),
+    CL >= C, DL >= D, !,
+    take(C, Cs, Es),
+    take(D, Ds, Fs),
+    recursive_combat_game(Es, Fs, [], _, _, W),
+    update_decks([C|Cs], [D|Ds], W, Es, Fs).
+recursive_combat_round([C|Cs], [D|Ds], _, _, Es, Ds) :-
+    C >= D, !,
+    append(Cs, [C, D], Es).
+recursive_combat_round([C|Cs], [D|Ds], _, _, Cs, Es) :-
+    C >= D, !,
+    append(Ds, [D, C], Es).
+
+recursive_combat_game([], Ds, _, _, Ds, 1) :- !.
+recursive_combat_game(Cs, [], _, _, Cs, 0) :- !.
+recursive_combat_game([C|Cs], [D|Ds], Ps1, Ps2, Ws, W) :-
+    recursive_combat_round([C|Cs], [D|Ds], Ps1, Ps2, Es, Fs),
+    recursive_combat_game(Es, Fs, [Es|Ps1], [Fs|Ps2], Ws, W).
+
+% Game scores
 
 score_impl([X], 1, X) :- !.
 score_impl([X|Xs], M, Z) :-
@@ -27,10 +68,6 @@ score_impl([X|Xs], M, Z) :-
     Z is Y + (X * M).
 
 score(Xs, Y) :- score_impl(Xs, _, Y).
-
-game_score(Cs, Ds, Y) :-
-    game(Cs, Ds, Ws),
-    score(Ws, Y).
 
 % DCG for parsing the input
 
@@ -56,7 +93,13 @@ eos([], []).
 parse_input(Ds) :-
     phrase_from_file(decks(Ds), 'resources/input.txt').
 
-part1 :-
+main :-
     parse_input([Cs, Ds]),
-    game_score(Cs, Ds, Score),
-    print(['Part 1', Score]), nl.
+
+    combat_game(Cs, Ds, Ws1),
+    score(Ws1, Score1),
+    print(['Part 1', Score1]), nl,
+
+    recursive_combat_game(Cs, Ds, [], [], Ws2, _),
+    score(Ws2, Score2),
+    print(['Part 2', Score2]), nl.
