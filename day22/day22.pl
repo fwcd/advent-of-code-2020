@@ -1,3 +1,5 @@
+:- use_module(library(pio)).
+
 append([], Xs, Xs).
 append([E|Es], Xs, [E|Fs]) :- append(Es, Xs, Fs).
 
@@ -18,14 +20,34 @@ game([C|Cs], [D|Ds], Ws) :-
     % print([Es, Fs]), nl,
     game(Es, Fs, Ws).
 
-scoreImpl([X], 1, X) :- !.
-scoreImpl([X|Xs], M, Z) :-
-    scoreImpl(Xs, N, Y),
+score_impl([X], 1, X) :- !.
+score_impl([X|Xs], M, Z) :-
+    score_impl(Xs, N, Y),
     M is N + 1,
     Z is Y + (X * M).
 
-score(Xs, Y) :- scoreImpl(Xs, _, Y).
+score(Xs, Y) :- score_impl(Xs, _, Y).
 
-part1(Cs, Ds, Y) :-
+game_score(Cs, Ds, Y) :-
     game(Cs, Ds, Ws),
     score(Ws, Y).
+
+% DCG for parsing the input
+
+decks([])     --> call(eos), !.
+decks([D|Ds]) --> deck(D), decks(Ds).
+
+deck(Vs) --> line(_), call(num_lines(Vs)).
+
+num_lines([])     --> line([]), !.
+num_lines([N|Ns]) --> call(num_line(N)), num_lines(Ns). 
+
+num_line(N, I, J) :-
+    line(L, I, J),
+    number_codes(N, L).
+
+line([])     --> ("\n"; call(eos)), !.
+line([C|Cs]) --> [C], line(Cs).
+
+eos([], []).
+
