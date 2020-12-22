@@ -23,7 +23,7 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 19: Haskell
 - [x] Day 20: C++
 - [x] Day 21: Kotlin
-- [ ] Day 22: ?
+- [x] Day 22: Prolog
 - [ ] Day 23: ?
 - [ ] Day 24: ?
 - [ ] Day 25: ?
