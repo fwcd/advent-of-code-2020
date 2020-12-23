@@ -2,7 +2,21 @@
   (let ((ys (copy-tree xs)))
     (setf (cdr (last ys)) ys)))
 
-(defun move (n cups))
+(defun take (n xs)
+  (if (> n 0) (cons (car xs) (take (- n 1) (cdr xs)))
+              nil))
+
+(defun drop (n xs)
+  (if (> n 0) (drop (- n 1) (cdr xs))
+              xs))
+
+(defun circle-drop-impl (xs old-start new-start)
+  (if (eq (cdr xs) old-start) (setf (cdr xs) new-start)
+                              (circle-drop-impl (cdr xs) old-start new-start)))
+
+(defun circle-drop (n xs)
+  (let ((ys (drop n xs)))
+    (circle-drop-impl ys xs ys)))
 
 (defun main ()
   (setq *print-circle* t)
