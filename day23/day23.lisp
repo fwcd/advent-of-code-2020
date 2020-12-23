@@ -10,6 +10,13 @@
   (if (> n 0) (drop (- n 1) (cdr xs))
               xs))
 
+(defun circle-unroll-impl (xs start)
+  (if (eq (cdr xs) start) (cons (car xs) nil)
+                          (cons (car xs) (circle-unroll-impl (cdr xs) start))))
+
+(defun circle-unroll (xs)
+  (circle-unroll-impl xs xs))
+
 (defun circle-repoint-start (xs old-start new-start)
   (if (eq (cdr xs) old-start) (setf (cdr xs) new-start)
                               (circle-repoint-start (cdr xs) old-start new-start)))
@@ -22,7 +29,41 @@
   (let ((ys (cons x xs)))
     (circle-repoint-start (cdr ys) xs ys)))
 
+(defun circle-append (xs ys)
+  (if xs (circle-cons (car xs) (circle-append (cdr xs) ys))
+         ys))
+
+(defun circle-find-impl (f xs start)
+  (cond ((eq (cdr xs) start) nil)
+        ((funcall f (car xs)) xs)
+        (t (circle-find-impl f (cdr xs) start))))
+
+(defun circle-find (f xs)
+  (circle-find-impl f xs xs))
+
+(defun iterate (n f x)
+  (format t "~S: ~S~%" n x)
+  (if (> n 0) (iterate (- n 1) f (funcall f x))
+              x))
+
+(defun dest-cup (x mn mx xs)
+  (if (< x mn) (dest-cup mx mn mx xs)
+               (let ((zs (circle-find (lambda (y) (eql x y)) xs)))
+                  (if zs zs
+                         (dest-cup (- x 1) mn mx xs)))))
+
+(defun move (xs)
+  (let ((x (car xs))
+        (ts (take 3 (cdr xs))))
+    (circle-drop 3 (cdr xs))
+    (let* ((xsl (cdr (circle-unroll xs)))
+           (zs (dest-cup (- x 1) (apply 'min xsl) (apply 'max xsl) xs)))
+      (circle-append ts (cdr zs))
+      (cdr xs))))
+
 (defun main ()
   (setq *print-circle* t)
-  (let ((part1 (circle (list 9 1 6 4 3 8 2 7 5))))
+  (let* ((input (circle (list 3 8 9 1 2 5 4 6 7)))
+         (final (iterate 100 'move input))
+         (part1 (cdr (circle-find (lambda (x) (eql x 1)) final))))
     (format t "Part 1: ~S~%" part1)))
