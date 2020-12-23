@@ -45,6 +45,10 @@
   (if (> n 0) (iterate (- n 1) f (funcall f x))
               x))
 
+(defun range (n m)
+  (if (< n m) (cons n (range (+ n 1) m))
+              nil))
+
 (defun dest-cup (x mn mx xs)
   (if (< x mn) (dest-cup mx mn mx xs)
                (let ((zs (circle-find (lambda (y) (eql x y)) xs)))
@@ -62,7 +66,12 @@
 
 (defun main ()
   (setq *print-circle* t)
-  (let* ((input (circle (list 3 8 9 1 2 5 4 6 7)))
-         (final (iterate 100 'move input))
-         (part1 (cdr (circle-find (lambda (x) (eql x 1)) final))))
-    (format t "Part 1: ~S~%" part1)))
+  (let* ((inputl1 '(3 8 9 1 2 5 4 6 7))
+         (input1 (circle inputl1))
+         (final1 (iterate 100 'move input1))
+         (part1 (cdr (circle-find (lambda (x) (eql x 1)) final1))))
+    (format t "Part 1: ~S~%" part1)
+    (let* ((n (length inputl1))
+           (mx (apply 'max inputl1))
+           (inputl2 (append inputl1 (range (+ mx 1) (+ (+ mx 1) (- 1000000 n))))))
+      (print (length inputl2)))))
