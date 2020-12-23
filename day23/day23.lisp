@@ -10,13 +10,17 @@
   (if (> n 0) (drop (- n 1) (cdr xs))
               xs))
 
-(defun circle-drop-impl (xs old-start new-start)
+(defun circle-repoint-start (xs old-start new-start)
   (if (eq (cdr xs) old-start) (setf (cdr xs) new-start)
-                              (circle-drop-impl (cdr xs) old-start new-start)))
+                              (circle-repoint-start (cdr xs) old-start new-start)))
 
 (defun circle-drop (n xs)
   (let ((ys (drop n xs)))
-    (circle-drop-impl ys xs ys)))
+    (circle-repoint-start ys xs ys)))
+
+(defun circle-cons (x xs)
+  (let ((ys (cons x xs)))
+    (circle-repoint-start (cdr ys) xs ys)))
 
 (defun main ()
   (setq *print-circle* t)
