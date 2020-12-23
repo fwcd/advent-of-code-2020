@@ -1,6 +1,5 @@
 def dest_cup(x, xs):
     if x < min(xs):
-        print("Wrapping")
         return dest_cup(max(xs), xs)
     else:
         try:
@@ -20,7 +19,6 @@ def main():
     xs = [3, 8, 9, 1, 2, 5, 4, 6, 7]
     # xs = [9, 1, 6, 4, 3, 8, 2, 7, 5]
     for i in range(100):
-        print(100 - i, xs)
         xs = move(xs)
     i = (xs.index(1) + 1) % len(xs)
     xs = xs[i:] + xs[:i]

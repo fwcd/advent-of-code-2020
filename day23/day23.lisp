@@ -42,7 +42,6 @@
   (circle-find-impl f xs xs))
 
 (defun iterate (n f x)
-  (format t "~S: ~S~%" n x)
   (if (> n 0) (iterate (- n 1) f (funcall f x))
               x))
 
