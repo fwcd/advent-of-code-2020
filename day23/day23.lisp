@@ -2,8 +2,16 @@
   (let ((ys (copy-tree xs)))
     (setf (cdr (last ys)) ys)))
 
+(defun nodes (xs)
+  (if xs (cons xs (nodes (cdr xs)))
+         (cons xs nil)))
+
 (defun take (n xs)
   (if (> n 0) (cons (car xs) (take (- n 1) (cdr xs)))
+              nil))
+
+(defun take-nodes (n xs)
+  (if (> n 0) (cons xs (take-nodes (- n 1) (cdr xs)))
               nil))
 
 (defun drop (n xs)
@@ -42,7 +50,7 @@
   (circle-find-impl f xs xs))
 
 (defun iterate (n f x)
-  (format t "~S~S~%" (take 10 x) (take 30 (drop 999970 x)))
+  (format t "~S~%" n)
   (if (> n 0) (iterate (- n 1) f (funcall f x))
               x))
 
@@ -50,32 +58,45 @@
   (if (< n m) (cons n (range (+ n 1) m))
               nil))
 
-(defun dest-cup (x mn mx xs)
-  (if (< x mn) (dest-cup mx mn mx xs)
-               (let ((zs (circle-find (lambda (y) (eql x y)) xs)))
+(defun dest-cup (x mn mx ht)
+  (if (< x mn) (dest-cup mx mn mx ht)
+               (let ((zs (gethash x ht)))
                   (if zs zs
-                         (dest-cup (- x 1) mn mx xs)))))
+                         (dest-cup (- x 1) mn mx ht)))))
 
-(defun move (xs)
+(defun move (xs ht)
   (let ((x (car xs))
         (ts (take 3 (cdr xs))))
+    (loop for x in (take-nodes 3 (cdr xs)) do
+      (remhash (car x) ht))
     (circle-drop 3 (cdr xs))
     (let* ((xsl (cdr (circle-unroll xs)))
-           (zs (dest-cup (- x 1) (apply 'min xsl) (apply 'max xsl) xs)))
+           (zs (dest-cup (- x 1) (apply 'min xsl) (apply 'max xsl) ht)))
       (circle-append ts (cdr zs))
+      (loop for x in (take-nodes 3 (cdr zs)) do
+        (setf (gethash (car x) ht) x))
       (cdr xs))))
+
+(defun store-nodes-in-hash-table (xs ht start)
+  (setf (gethash (car xs) ht) xs)
+  (if (eq xs start) nil (store-nodes-in-hash-table (cdr xs) ht start)))
+
+(defun play (n xs)
+  (let ((ht (make-hash-table)))
+    (store-nodes-in-hash-table (cdr xs) ht xs)
+    (iterate n (lambda (ys) (move ys ht)) xs)))
 
 (defun main ()
   (declare (optimize (speed 3) (debug 0) (safety 0)))
   (setq *print-circle* t)
   (let* ((inputl1 '(9 1 6 4 3 8 2 7 5))
          (input1 (circle inputl1))
-         (final1 (cdr (circle-find (lambda (x) (eql x 1)) (iterate 100 'move input1)))))
+         (final1 (cdr (circle-find (lambda (x) (eql x 1)) (play 100 input1)))))
     (format t "Part 1: ~S~%" final1)
     (let* ((n (length inputl1))
            (mx (apply 'max inputl1))
            (inputl2 (append inputl1 (range (+ mx 1) (+ (+ mx 1) (- 1000000 n)))))
            (input2 (circle inputl2))
-           (final2 (cdr (circle-find (lambda (x) (eql x 1)) (iterate 10000000 'move input2))))
+           (final2 (cdr (circle-find (lambda (x) (eql x 1)) (play 10000000 input2))))
            (part2 (* (car final2) (car (cdr final2)))))
       (format t "Part 2: ~S~%" part2))))
