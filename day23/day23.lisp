@@ -69,10 +69,10 @@
         (ts (take 3 (cdr xs))))
     (loop for x in (take-nodes 3 (cdr xs)) do
       (remhash (car x) ht))
-    (circle-drop 3 (cdr xs))
+    (setf (cdr xs) (drop 3 (cdr xs)))
     (let* ((xsl (cdr (circle-unroll xs)))
            (zs (dest-cup (- x 1) (apply 'min xsl) (apply 'max xsl) ht)))
-      (circle-append ts (cdr zs))
+      (setf (cdr zs) (append ts (cdr zs)))
       (loop for x in (take-nodes 3 (cdr zs)) do
         (setf (gethash (car x) ht) x))
       (cdr xs))))
