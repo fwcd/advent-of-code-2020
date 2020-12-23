@@ -34,8 +34,8 @@
          ys))
 
 (defun circle-find-impl (f xs start)
-  (cond ((eq (cdr xs) start) nil)
-        ((funcall f (car xs)) xs)
+  (cond ((funcall f (car xs)) xs)
+        ((eq (cdr xs) start) nil)
         (t (circle-find-impl f (cdr xs) start))))
 
 (defun circle-find (f xs)
