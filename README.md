@@ -24,6 +24,6 @@ My solutions to the [Advent of Code 2020](https://adventofcode.com/2020), writte
 - [x] Day 20: C++
 - [x] Day 21: Kotlin
 - [x] Day 22: Prolog
-- [ ] Day 23: ?
+- [x] Day 23: Common Lisp
 - [ ] Day 24: ?
 - [ ] Day 25: ?
