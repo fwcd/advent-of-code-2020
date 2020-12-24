@@ -1,3 +1,6 @@
+;; The day 23 solution uses a cyclic linked list and
+;; a hash table that associates values to list nodes.
+
 (defun circle (xs)
   (let ((ys (copy-tree xs)))
     (setf (cdr (last ys)) ys)))
