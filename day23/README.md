@@ -2,13 +2,13 @@
 
 ## Running
 
-Make sure to have Common Lisp installed, e.g. `SBCL`. To run the REPL, invoke `sbcl` or, for more comfortable editing:
+Make sure to have Common Lisp installed, e.g. `SBCL`. To run the REPL, invoke
 
 ```
-rlwrap sbcl
+rlwrap sbcl --control-stack-size 1024
 ```
 
-Now you can load and run the program:
+The increased stack size is needed to create the (cyclic) linked list for part 2, which needs to hold a million items. To load and run the program, simply execute
 
 ```lisp
 (load "day23.lisp")

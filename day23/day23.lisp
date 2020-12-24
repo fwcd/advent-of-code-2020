@@ -24,6 +24,14 @@
 (defun circle-unroll (xs)
   (circle-unroll-impl xs xs))
 
+(defun circle-find-impl (f xs start)
+  (cond ((funcall f (car xs)) xs)
+        ((eq (cdr xs) start) nil)
+        (t (circle-find-impl f (cdr xs) start))))
+
+(defun circle-find (f xs)
+  (circle-find-impl f xs xs))
+
 (defun iterate (n f x)
   ;; (format t "~S~%" n)
   (if (> n 0) (iterate (- n 1) f (funcall f x))
