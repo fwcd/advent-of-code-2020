@@ -44,3 +44,26 @@ File.open('resources/input.txt', 'r') do |f|
 end
 
 puts "Part 1: #{black_tiles.size()}"
+
+100.times do
+  new_tiles = Set[]
+  tiles = black_tiles.clone.flat_map do |tile|
+    [tile] + $dirs.map do |_, dir| tile + dir end
+  end.to_set
+  tiles.each do |tile|
+    nbs = 0
+    $dirs.each do |_, dir|
+      if black_tiles.include?(tile + dir)
+        nbs += 1
+      end
+    end
+    if black_tiles.include?(tile) and (nbs == 0 or nbs > 2)
+      new_tiles.delete(tile)
+    elsif (not black_tiles.include?(tile) and nbs == 2) or black_tiles.include?(tile)
+      new_tiles.add(tile)
+    end
+  end
+  black_tiles = new_tiles
+end
+
+puts "Part 2: #{black_tiles.size()}"
