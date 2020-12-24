@@ -5,10 +5,6 @@
   (let ((ys (copy-tree xs)))
     (setf (cdr (last ys)) ys)))
 
-(defun nodes (xs)
-  (if xs (cons xs (nodes (cdr xs)))
-         (cons xs nil)))
-
 (defun take (n xs)
   (if (> n 0) (cons (car xs) (take (- n 1) (cdr xs)))
               nil))
@@ -27,30 +23,6 @@
 
 (defun circle-unroll (xs)
   (circle-unroll-impl xs xs))
-
-(defun circle-repoint-start (xs old-start new-start)
-  (if (eq (cdr xs) old-start) (setf (cdr xs) new-start)
-                              (circle-repoint-start (cdr xs) old-start new-start)))
-
-(defun circle-drop (n xs)
-  (let ((ys (drop n xs)))
-    (circle-repoint-start ys xs ys)))
-
-(defun circle-cons (x xs)
-  (let ((ys (cons x xs)))
-    (circle-repoint-start (cdr ys) xs ys)))
-
-(defun circle-append (xs ys)
-  (if xs (circle-cons (car xs) (circle-append (cdr xs) ys))
-         ys))
-
-(defun circle-find-impl (f xs start)
-  (cond ((funcall f (car xs)) xs)
-        ((eq (cdr xs) start) nil)
-        (t (circle-find-impl f (cdr xs) start))))
-
-(defun circle-find (f xs)
-  (circle-find-impl f xs xs))
 
 (defun iterate (n f x)
   ;; (format t "~S~%" n)
