@@ -43,6 +43,11 @@ unsigned long long part2StepAt(unsigned long long i, struct Input input) {
     // together all solved busses and can thus step
     // increasingly quickly.
 
+    // Note for future self: This is effectively an implementation of the
+    // Chinese Remainder Theorem via search by sieving (the moduli n_i are our
+    // busses), even though I didn't know about the CRT at the time:
+    // https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Search_by_sieving
+
     unsigned long long step = 1;
     for (int k = 0; k < input.busCount; k++) {
         int bus = input.busses[k];
